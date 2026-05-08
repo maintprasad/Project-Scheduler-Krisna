@@ -694,7 +694,9 @@ async function apiGet(action, params = {}) {
   if(IS_DEMO) return mockGet(action, params);
   const url = new URL(GAS_URL);
   url.searchParams.set('action', action);
+  // kirim params dua cara: langsung dan via payload (fallback)
   Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, String(v)));
+  url.searchParams.set('payload', JSON.stringify(params));
   const res = await fetch(url.toString(), { method: 'GET', mode: 'cors' });
   if(!res.ok) throw new Error('HTTP ' + res.status);
   return res.json();
@@ -702,11 +704,10 @@ async function apiGet(action, params = {}) {
 
 async function apiPost(action, data) {
   if(IS_DEMO) return mockPost(action, data);
-  const res = await fetch(GAS_URL, {
-    method: 'POST', mode: 'cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action, ...data })
-  });
+  const url = new URL(GAS_URL);
+  url.searchParams.set('action', action);
+  url.searchParams.set('payload', JSON.stringify(data));
+  const res = await fetch(url.toString(), { method: 'GET', mode: 'cors' });
   if(!res.ok) throw new Error('HTTP ' + res.status);
   return res.json();
 }
