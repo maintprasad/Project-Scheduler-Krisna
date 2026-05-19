@@ -1,1550 +1,1890 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>S-Curve Project Schedule & Overview</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-<style>
-  :root {
-    --bg-base:      #0d0f14;
-    --bg-panel:     #13161d;
-    --bg-card:      #1a1e29;
-    --bg-hover:     #20253a;
-    --bg-input:     #0d0f14;
-    --border:       #252b3b;
-    --border-light: #2e3650;
-    --text-primary: #e8ecf5;
-    --text-secondary:#8892a4;
-    --text-muted:   #4a5568;
-    --accent:       #f5a623;
-    --accent-dim:   #c2851b;
-    --accent-glow:  rgba(245,166,35,0.15);
-    --success:      #22c55e;
-    --warning:      #eab308;
-    --danger:       #ef4444;
-    --info:         #3b82f6;
-    --radius-sm:    4px;
-    --radius:       8px;
-    --radius-lg:    12px;
-    --shadow:       0 4px 24px rgba(0,0,0,0.4);
-    --font-display: 'Syne', sans-serif;
-    --font-body:    'DM Sans', sans-serif;
-    --font-mono:    'DM Mono', monospace;
-    --transition:   all 0.2s cubic-bezier(0.4,0,0.2,1);
-  }
-  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
-  body { background:var(--bg-base); color:var(--text-primary); font-family:var(--font-body); font-size:14px; line-height:1.6; min-height:100vh; overflow-x:hidden; }
-  ::-webkit-scrollbar { width:6px; height:6px; }
-  ::-webkit-scrollbar-track { background:var(--bg-base); }
-  ::-webkit-scrollbar-thumb { background:var(--border-light); border-radius:3px; }
-  ::-webkit-scrollbar-thumb:hover { background:var(--accent-dim); }
-  .app-shell { display:flex; flex-direction:column; min-height:100vh; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRASAD SEEDS - Project Monitoring System</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    
+    <style>
+        /* --- CORE DESIGN SYSTEM (Industrial Dark Theme) --- */
+        :root {
+            --bg-main: #121214;
+            --bg-card: #1c1c21;
+            --bg-input: #26262b;
+            --border-color: #2e2e35;
+            --text-main: #e4e4e7;
+            --text-muted: #a1a1aa;
+            --accent-color: #00adb5;
+            --status-open: #ef4444;
+            --status-progress: #f59e0b;
+            --status-closed: #10b981;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif; }
+        body { background-color: var(--bg-main); color: var(--text-main); padding: 20px; line-height: 1.5; }
 
-  /* Header */
-  .header {
-    position:sticky; top:0; z-index:100;
-    background:linear-gradient(180deg,#0d0f14 0%,rgba(13,15,20,0.95) 100%);
-    backdrop-filter:blur(12px); border-bottom:1px solid var(--border);
-    padding:0 24px; height:64px; display:flex; align-items:center; justify-content:space-between;
-  }
-  .header-brand { display:flex; align-items:center; gap:12px; }
-  .header-logo {
-    width:36px; height:36px;
-    background:linear-gradient(135deg,var(--accent) 0%,var(--accent-dim) 100%);
-    border-radius:var(--radius-sm); display:flex; align-items:center; justify-content:center;
-    font-family:var(--font-mono); font-size:13px; font-weight:500; color:#000;
-  }
-  .header-title { font-family:var(--font-display); font-size:16px; font-weight:700; letter-spacing:0.02em; }
-  .header-sub { font-size:11px; color:var(--text-muted); font-family:var(--font-mono); letter-spacing:0.05em; }
-  .header-actions { display:flex; align-items:center; gap:12px; }
-  .btn-new-project {
-    background:var(--accent); color:#000; font-family:var(--font-display);
-    font-weight:700; font-size:12px; letter-spacing:0.06em; text-transform:uppercase;
-    padding:8px 18px; border:none; border-radius:var(--radius-sm); cursor:pointer; transition:var(--transition);
-  }
-  .btn-new-project:hover { background:#ffb83d; transform:translateY(-1px); box-shadow:0 4px 16px rgba(245,166,35,0.4); }
-  .sync-info { font-family:var(--font-mono); font-size:11px; color:var(--text-muted); }
+        header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; border-bottom: 2px solid var(--border-color); margin-bottom: 25px; }
+        .brand h1 { font-size: 24px; letter-spacing: 1px; color: #fff; }
+        .brand p { color: var(--accent-color); font-size: 12px; text-transform: uppercase; font-weight: bold; }
+        .header-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 
-  /* Main */
-  .main-content { flex:1; padding:24px; max-width:1600px; margin:0 auto; width:100%; }
+        /* --- SYNC STATUS BAR --- */
+        #sync-status-bar {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px 16px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            font-size: 13px;
+        }
+        .sync-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .sync-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--text-muted);
+            transition: background 0.3s;
+        }
+        .sync-dot.syncing { background: var(--status-progress); animation: pulse 1s infinite; }
+        .sync-dot.synced  { background: var(--status-closed); }
+        .sync-dot.error   { background: var(--status-open); }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-  /* Demo banner */
-  .demo-banner {
-    background:rgba(59,130,246,0.08); border:1px solid rgba(59,130,246,0.3);
-    border-radius:var(--radius); padding:10px 16px; margin-bottom:16px;
-    display:flex; align-items:center; gap:10px; font-size:12px;
-    color:var(--text-secondary); font-family:var(--font-mono);
-  }
-  .demo-banner.hidden { display:none; }
+        /* --- BUTTONS --- */
+        .btn { padding: 10px 18px; border-radius: 4px; border: none; font-weight: 600; cursor: pointer; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: opacity 0.2s; }
+        .btn:hover { opacity: 0.9; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-primary   { background-color: var(--accent-color); color: #fff; }
+        .btn-success   { background-color: var(--status-closed); color: #fff; }
+        .btn-danger    { background-color: var(--status-open); color: #fff; }
+        .btn-secondary { background-color: #4b5563; color: #fff; }
+        .btn-warning   { background-color: var(--status-progress); color: #fff; }
 
-  /* Summary cards */
-  .summary-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-bottom:24px; }
-  @media(max-width:1100px){ .summary-grid{ grid-template-columns:repeat(3,1fr); } }
-  @media(max-width:600px){  .summary-grid{ grid-template-columns:repeat(2,1fr); } }
-  .summary-card {
-    background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg);
-    padding:20px; cursor:pointer; transition:var(--transition); position:relative; overflow:hidden;
-  }
-  .summary-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; border-radius:var(--radius-lg) var(--radius-lg) 0 0; }
-  .summary-card.all::before     { background:linear-gradient(90deg,var(--info),#60a5fa); }
-  .summary-card.in-prog::before { background:linear-gradient(90deg,#3b82f6,#93c5fd); }
-  .summary-card.on-track::before{ background:linear-gradient(90deg,var(--success),#4ade80); }
-  .summary-card.delayed::before { background:linear-gradient(90deg,var(--danger),#f87171); }
-  .summary-card.done::before    { background:linear-gradient(90deg,#a855f7,#c084fc); }
-  .summary-card:hover { border-color:var(--border-light); transform:translateY(-2px); box-shadow:var(--shadow); }
-  .sc-label { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.08em; font-family:var(--font-mono); }
-  .sc-value { font-family:var(--font-display); font-size:36px; font-weight:800; line-height:1; margin:8px 0 4px; }
-  .sc-value.all     { color:#60a5fa; }
-  .sc-value.in-prog { color:#3b82f6; }
-  .sc-value.on-track{ color:var(--success); }
-  .sc-value.delayed { color:var(--danger); }
-  .sc-value.done    { color:#a855f7; }
-  .sc-sub { font-size:11px; color:var(--text-muted); }
+        /* --- DASHBOARD LAYOUT --- */
+        .grid-kpi { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .kpi-card { background-color: var(--bg-card); border: 1px solid var(--border-color); padding: 20px; border-radius: 6px; position: relative; overflow: hidden; }
+        .kpi-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
+        .kpi-total::before   { background-color: var(--accent-color); }
+        .kpi-open::before    { background-color: var(--status-open); }
+        .kpi-progress::before{ background-color: var(--status-progress); }
+        .kpi-closed::before  { background-color: var(--status-closed); }
+        .kpi-card .label { font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; }
+        .kpi-card .value { font-size: 28px; font-weight: bold; margin-top: 5px; color: #fff; }
 
-  /* Toolbar */
-  .toolbar {
-    background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius-lg);
-    padding:14px 18px; margin-bottom:20px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;
-  }
-  .toolbar-search { flex:1; min-width:180px; position:relative; }
-  .toolbar-search input {
-    width:100%; background:var(--bg-input); border:1px solid var(--border);
-    border-radius:var(--radius-sm); color:var(--text-primary); font-family:var(--font-body);
-    font-size:13px; padding:8px 12px 8px 34px; transition:var(--transition);
-  }
-  .toolbar-search input:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-glow); }
-  .search-icon { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:13px; pointer-events:none; }
-  .toolbar select {
-    background:var(--bg-input); border:1px solid var(--border); border-radius:var(--radius-sm);
-    color:var(--text-primary); font-family:var(--font-body); font-size:13px;
-    padding:8px 26px 8px 10px; appearance:none;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%238892a4' d='M5 6L0 0h10z'/%3E%3C/svg%3E");
-    background-repeat:no-repeat; background-position:right 9px center; cursor:pointer; transition:var(--transition);
-  }
-  .toolbar select:focus { outline:none; border-color:var(--accent); }
-  .btn-clear { background:transparent; border:1px solid var(--border); color:var(--text-secondary); padding:8px 12px; border-radius:var(--radius-sm); cursor:pointer; font-size:12px; transition:var(--transition); white-space:nowrap; }
-  .btn-clear:hover { border-color:var(--accent); color:var(--accent); }
+        /* --- FILTER SYSTEM --- */
+        .filter-panel { background-color: var(--bg-card); border: 1px solid var(--border-color); padding: 15px; border-radius: 6px; margin-bottom: 25px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; align-items: end; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-group label { font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; }
+        .form-control { background-color: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 12px; border-radius: 4px; font-size: 14px; outline: none; width: 100%; }
+        .form-control:focus { border-color: var(--accent-color); }
 
-  /* Table */
-  .projects-section { background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; }
-  .section-header { padding:14px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
-  .section-title { font-family:var(--font-display); font-size:15px; font-weight:700; letter-spacing:0.02em; }
-  .section-count { font-family:var(--font-mono); font-size:12px; color:var(--text-muted); }
-  .table-wrap { overflow-x:auto; }
-  table { width:100%; border-collapse:collapse; }
-  thead th {
-    background:var(--bg-base); padding:11px 14px; text-align:left;
-    font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.08em;
-    color:var(--text-muted); font-family:var(--font-mono); border-bottom:1px solid var(--border); white-space:nowrap;
-  }
-  tbody tr { border-bottom:1px solid var(--border); transition:var(--transition); cursor:pointer; }
-  tbody tr:last-child { border-bottom:none; }
-  tbody tr:hover { background:var(--bg-hover); }
-  tbody td { padding:13px 14px; font-size:13px; vertical-align:middle; }
-  .td-id   { font-family:var(--font-mono); font-size:11px; color:var(--text-muted); max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .td-name { font-weight:600; }
-  .td-meta { font-size:11px; color:var(--text-secondary); font-family:var(--font-mono); }
-  .td-date { font-family:var(--font-mono); font-size:11px; color:var(--text-muted); white-space:nowrap; }
+        /* --- CHARTS --- */
+        .charts-main-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 25px; }
+        .chart-container { background-color: var(--bg-card); border: 1px solid var(--border-color); padding: 20px; border-radius: 6px; height: 300px; position: relative; }
+        .chart-container h3 { font-size: 13px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
+        .chart-wrapper { position: relative; height: 210px; width: 100%; }
 
-  /* Progress bar */
-  .progress-wrap { display:flex; flex-direction:column; gap:4px; min-width:120px; }
-  .progress-track { height:6px; background:var(--bg-base); border-radius:3px; overflow:hidden; }
-  .progress-fill { height:100%; border-radius:3px; transition:width 0.6s ease; }
-  .progress-nums { display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:10px; }
+        /* --- DATA TABLE --- */
+        .table-section { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; margin-bottom: 25px; }
+        .table-header-box { padding: 15px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+        th { background-color: #17171c; color: var(--text-muted); text-transform: uppercase; font-size: 11px; font-weight: 700; padding: 12px 20px; border-bottom: 1px solid var(--border-color); }
+        td { padding: 14px 20px; border-bottom: 1px solid var(--border-color); color: var(--text-main); vertical-align: middle; }
+        tbody tr { cursor: pointer; transition: background-color 0.15s ease; }
+        tbody tr:hover td { background-color: #222229; }
 
-  /* Variance */
-  .variance { font-family:var(--font-mono); font-size:12px; font-weight:500; padding:3px 8px; border-radius:3px; white-space:nowrap; }
-  .variance.pos  { background:rgba(34,197,94,0.12);  color:var(--success); }
-  .variance.zero { background:rgba(59,130,246,0.12); color:var(--info); }
-  .variance.warn { background:rgba(234,179,8,0.12);  color:var(--warning); }
-  .variance.neg  { background:rgba(239,68,68,0.12);  color:var(--danger); }
+        /* --- BADGES & PROGRESS BAR --- */
+        .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+        .badge-open     { background-color: rgba(239,68,68,0.2); color:#f87171; border:1px solid rgba(239,68,68,0.4); }
+        .badge-progress { background-color: rgba(245,158,11,0.2); color:#fbbf24; border:1px solid rgba(245,158,11,0.4); }
+        .badge-closed   { background-color: rgba(16,185,129,0.2); color:#34d399; border:1px solid rgba(16,185,129,0.4); }
 
-  /* Status badge */
-  .status-badge { font-size:10px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; padding:3px 10px; border-radius:20px; font-family:var(--font-mono); white-space:nowrap; }
-  .status-badge.not-started  { background:rgba(74,85,104,0.3);   color:#718096; border:1px solid rgba(74,85,104,0.4); }
-  .status-badge.in-progress  { background:rgba(59,130,246,0.15); color:#60a5fa; border:1px solid rgba(59,130,246,0.3); }
-  .status-badge.on-track     { background:rgba(34,197,94,0.15);  color:#4ade80; border:1px solid rgba(34,197,94,0.3); }
-  .status-badge.warning      { background:rgba(234,179,8,0.15);  color:#fbbf24; border:1px solid rgba(234,179,8,0.3); }
-  .status-badge.delayed      { background:rgba(239,68,68,0.15);  color:#f87171; border:1px solid rgba(239,68,68,0.3); }
-  .status-badge.completed    { background:rgba(168,85,247,0.15); color:#c084fc; border:1px solid rgba(168,85,247,0.3); }
+        .progress-wrapper { display: flex; align-items: center; gap: 10px; min-width: 120px; }
+        .progress-bar-container { flex-grow: 1; background-color: #2e2e35; height: 6px; border-radius: 3px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; border-radius: 3px; }
 
-  .btn-action { background:transparent; border:1px solid var(--border); color:var(--text-secondary); padding:5px 10px; border-radius:var(--radius-sm); cursor:pointer; font-size:11px; transition:var(--transition); }
-  .btn-action:hover { border-color:var(--accent); color:var(--accent); }
+        /* --- MODAL MANAGEMENT --- */
+        .modal-overlay { position: fixed; top:0; left:0; right:0; bottom:0; background-color: rgba(0,0,0,0.75); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity:0; pointer-events:none; transition: opacity 0.2s ease-in-out; padding: 20px; }
+        .modal-overlay.active { opacity:1; pointer-events:auto; }
+        .modal-content { background-color: var(--bg-card); border: 1px solid var(--border-color); width: 100%; max-width: 850px; max-height: 90vh; border-radius: 8px; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5); }
+        .modal-header { padding: 15px 25px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background-color: #17171c; }
+        .modal-body { padding: 25px; }
+        .modal-footer { padding: 15px 25px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 10px; background-color: #17171c; }
+        .close-modal { background: none; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; }
+        .close-modal:hover { color: #fff; }
 
-  /* Empty */
-  .empty-state { padding:60px 20px; text-align:center; }
-  .empty-icon  { font-size:48px; margin-bottom:16px; opacity:0.3; }
-  .empty-title { font-family:var(--font-display); font-size:18px; font-weight:700; margin-bottom:8px; }
-  .empty-sub   { color:var(--text-muted); font-size:13px; }
+        .detail-split-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; margin-bottom: 25px; }
 
-  /* Loading */
-  .loading-overlay { position:fixed; inset:0; background:rgba(13,15,20,0.85); display:flex; align-items:center; justify-content:center; z-index:9999; backdrop-filter:blur(4px); }
-  .loading-overlay.hidden { display:none; }
-  .spinner { width:40px; height:40px; border:3px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin 0.8s linear infinite; }
-  @keyframes spin { to{ transform:rotate(360deg); } }
+        /* --- MILESTONE STEPPER --- */
+        .stepper-container { background: #17171c; padding: 20px; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 25px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 15px; }
+        .step-item { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; }
+        .step-icon { width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:bold; }
+        .step-icon.complete { background-color: rgba(16,185,129,0.2); color:#34d399; border:1px solid #10b981; }
+        .step-icon.active   { background-color: rgba(245,158,11,0.2); color:#fbbf24; border:1px solid #f59e0b; }
+        .step-icon.waiting  { background-color: #2e2e35; color: var(--text-muted); border:1px solid var(--border-color); }
+        .step-line { flex-grow:1; height:2px; background-color: var(--border-color); min-width:20px; }
+        .step-line.active { background-color: var(--status-progress); }
 
-  /* Modals */
-  .modal-backdrop {
-    position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(6px); z-index:200;
-    display:flex; align-items:flex-start; justify-content:center; padding:24px; overflow-y:auto;
-    opacity:0; pointer-events:none; transition:opacity 0.2s;
-  }
-  .modal-backdrop.open { opacity:1; pointer-events:all; }
-  .modal {
-    background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius-lg);
-    width:100%; max-width:900px; box-shadow:0 32px 80px rgba(0,0,0,0.6);
-    transform:translateY(20px); transition:transform 0.2s; margin:auto;
-  }
-  .modal-backdrop.open .modal { transform:translateY(0); }
-  .modal-lg { max-width:1200px; }
-  .modal-sm { max-width:440px; }
-  .modal-header { padding:18px 24px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
-  .modal-title { font-family:var(--font-display); font-size:18px; font-weight:700; }
-  .modal-close { background:transparent; border:none; color:var(--text-muted); font-size:20px; cursor:pointer; padding:4px 6px; border-radius:var(--radius-sm); transition:var(--transition); line-height:1; }
-  .modal-close:hover { color:var(--text-primary); background:var(--bg-hover); }
-  .modal-body { padding:24px; }
-  .modal-footer { padding:14px 24px; border-top:1px solid var(--border); display:flex; gap:10px; justify-content:flex-end; }
+        /* --- MILESTONE SLIDERS --- */
+        .milestone-editor-list { display: flex; flex-direction: column; gap: 15px; }
+        .milestone-row { background-color: var(--bg-input); border: 1px solid var(--border-color); padding: 15px; border-radius: 6px; display: grid; grid-template-columns: 2fr 1.5fr 3fr auto; gap: 15px; align-items: center; }
+        .slider-box { display: flex; align-items: center; gap: 10px; }
+        .slider-box input[type="range"] { flex-grow:1; accent-color: var(--accent-color); cursor: pointer; }
+        .slider-val { font-size:13px; font-weight:bold; width:35px; text-align:right; }
 
-  /* Form */
-  .form-grid   { display:grid; grid-template-columns:1fr 1fr;     gap:14px; }
-  .form-grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
-  @media(max-width:640px){ .form-grid,.form-grid-3{ grid-template-columns:1fr; } }
-  .form-group     { display:flex; flex-direction:column; gap:5px; }
-  .form-group.full{ grid-column:1/-1; }
-  .form-label { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted); font-family:var(--font-mono); }
-  .form-input {
-    background:var(--bg-input); border:1px solid var(--border); border-radius:var(--radius-sm);
-    color:var(--text-primary); font-family:var(--font-body); font-size:13px; padding:9px 11px; transition:var(--transition);
-  }
-  .form-input:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-glow); }
-  .form-input::placeholder { color:var(--text-muted); }
-  textarea.form-input { resize:vertical; min-height:72px; }
-  select.form-input { appearance:none; cursor:pointer; }
+        /* --- UNSAVED CHANGES BADGE --- */
+        .unsaved-badge { background: rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.4); color:#fbbf24; font-size:11px; font-weight:bold; padding:3px 8px; border-radius:4px; display:none; }
+        .unsaved-badge.visible { display:inline-block; }
 
-  /* WD rows (create form) */
-  .wd-section { margin-top:22px; }
-  .wd-section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
-  .wd-section-title { font-family:var(--font-display); font-weight:700; font-size:14px; }
-  .btn-add-wd { background:rgba(245,166,35,0.1); border:1px solid rgba(245,166,35,0.3); color:var(--accent); padding:6px 14px; border-radius:var(--radius-sm); cursor:pointer; font-size:12px; font-weight:600; transition:var(--transition); }
-  .btn-add-wd:hover { background:rgba(245,166,35,0.2); border-color:var(--accent); }
-  .wd-rows { display:flex; flex-direction:column; gap:10px; }
-  .wd-row { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:14px; }
-  .wd-row-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
-  .wd-row-num { font-family:var(--font-mono); font-size:11px; color:var(--accent); font-weight:500; }
-  .btn-del-wd { background:transparent; border:none; color:var(--danger); cursor:pointer; padding:3px 6px; border-radius:var(--radius-sm); font-size:13px; transition:var(--transition); }
-  .btn-del-wd:hover { background:rgba(239,68,68,0.15); }
+        /* --- RESPONSIVE --- */
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            header { flex-direction: column; align-items: flex-start; gap: 15px; }
+            .header-actions { width: 100%; flex-direction: column; gap: 8px; }
+            .header-actions .btn { width: 100%; padding: 12px; }
+            .modal-overlay { padding: 10px; }
+            .modal-content { max-height: 95vh; }
+            #modal-create .modal-body { grid-template-columns: 1fr !important; }
+            #modal-create .modal-body .form-group { grid-column: span 1 !important; }
+            .detail-split-grid { grid-template-columns: 1fr; gap: 15px; }
+            .milestone-row { grid-template-columns: 1fr; gap: 10px; }
+            .milestone-row div:last-child { text-align: right; }
+            .stepper-container { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .step-line { display: none; }
+        }
 
-  /* Buttons */
-  .btn { padding:9px 18px; border-radius:var(--radius-sm); cursor:pointer; font-size:13px; font-weight:600; transition:var(--transition); border:none; font-family:var(--font-body); }
-  .btn-primary   { background:var(--accent); color:#000; }
-  .btn-primary:hover { background:#ffb83d; transform:translateY(-1px); box-shadow:0 4px 16px rgba(245,166,35,0.35); }
-  .btn-secondary { background:var(--bg-hover); color:var(--text-primary); border:1px solid var(--border); }
-  .btn-secondary:hover { border-color:var(--accent); color:var(--accent); }
-  .btn-danger    { background:rgba(239,68,68,0.15); color:var(--danger); border:1px solid rgba(239,68,68,0.3); }
-  .btn-danger:hover { background:rgba(239,68,68,0.25); }
-  .btn-success   { background:rgba(34,197,94,0.15); color:var(--success); border:1px solid rgba(34,197,94,0.3); }
-  .btn-success:hover { background:rgba(34,197,94,0.25); }
-  .btn-sm { padding:6px 12px; font-size:12px; }
+        /* --- GANTT MODAL --- */
+        #modal-gantt .modal-content { max-width: 520px; }
+        .gantt-project-list { max-height: 320px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 4px; margin-top: 10px; }
+        .gantt-project-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--border-color); cursor: pointer; transition: background 0.15s; }
+        .gantt-project-item:last-child { border-bottom: none; }
+        .gantt-project-item:hover { background: #222229; }
+        .gantt-project-item input[type="checkbox"] { accent-color: var(--accent-color); width: 16px; height: 16px; cursor: pointer; flex-shrink: 0; }
+        .gantt-project-item label { cursor: pointer; flex-grow: 1; font-size: 13px; }
+        .gantt-project-item .gantt-item-meta { font-size: 11px; color: var(--text-muted); }
+        .gantt-select-all-row { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 2px solid var(--border-color); background: #17171c; }
+        .gantt-select-all-row input[type="checkbox"] { accent-color: var(--accent-color); width: 16px; height: 16px; cursor: pointer; }
+        .gantt-select-all-row label { cursor: pointer; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); }
 
-  /* Detail tabs */
-  .detail-tabs { display:flex; border-bottom:1px solid var(--border); margin:-24px -24px 24px; padding:0 24px; overflow-x:auto; }
-  .detail-tab { padding:13px 18px; font-size:13px; font-weight:600; color:var(--text-muted); cursor:pointer; border-bottom:2px solid transparent; transition:var(--transition); font-family:var(--font-display); white-space:nowrap; }
-  .detail-tab:hover { color:var(--text-primary); }
-  .detail-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
-  .tab-content { display:none; }
-  .tab-content.active { display:block; }
+        /* --- PDF TEMPLATE --- */
+        #pdf-template { display: none; background: #fff; color: #000; padding: 20px 25px; width: 1000px; font-size: 11px; }
+        #pdf-template h1, #pdf-template h2, #pdf-template h3, #pdf-template th, #pdf-template td, #pdf-template p { color: #111 !important; }
+        .pdf-project-card { border:1px solid #ccc; padding:15px; margin-bottom:20px; page-break-inside:avoid; }
+        .pdf-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:10px; font-size:12px; }
 
-  /* Info grid */
-  .info-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:20px; }
-  @media(max-width:700px){ .info-grid{ grid-template-columns:1fr 1fr; } }
-  .info-item { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:12px; }
-  .info-item-label { font-size:10px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted); font-family:var(--font-mono); margin-bottom:4px; }
-  .info-item-value { font-size:13px; font-weight:600; font-family:var(--font-mono); word-break:break-all; }
-
-  /* Chart */
-  .chart-container { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg); padding:20px; margin-bottom:20px; }
-  .chart-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; flex-wrap:wrap; gap:12px; }
-  .chart-title { font-family:var(--font-display); font-weight:700; font-size:14px; }
-  .chart-kpis { display:flex; gap:20px; }
-  .kpi-item { text-align:right; }
-  .kpi-label { font-size:10px; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted); font-family:var(--font-mono); }
-  .kpi-value { font-family:var(--font-display); font-size:18px; font-weight:800; }
-  .kpi-value.plan { color:#60a5fa; }
-  .kpi-value.actual { color:var(--accent); }
-  .kpi-value.v-pos  { color:var(--success); }
-  .kpi-value.v-zero { color:var(--info); }
-  .kpi-value.v-warn { color:var(--warning); }
-  .kpi-value.v-neg  { color:var(--danger); }
-  .chart-canvas-wrap { position:relative; height:280px; }
-
-  /* WD table (detail modal) */
-  .wd-table-wrap { overflow-x:auto; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg); }
-  .wd-table { width:100%; border-collapse:collapse; }
-  .wd-table th { background:var(--bg-base); padding:9px 11px; font-size:10px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted); font-family:var(--font-mono); border-bottom:1px solid var(--border); white-space:nowrap; text-align:left; }
-  .wd-table td { padding:9px 11px; border-bottom:1px solid var(--border); font-size:12px; vertical-align:middle; }
-  .wd-table tr:last-child td { border-bottom:none; }
-  .wd-table input, .wd-table select {
-    background:transparent; border:1px solid transparent; color:var(--text-primary);
-    font-family:var(--font-body); font-size:12px; padding:4px 7px;
-    border-radius:var(--radius-sm); width:100%; min-width:70px; transition:var(--transition);
-  }
-  .wd-table input:focus, .wd-table select:focus { background:var(--bg-input); border-color:var(--accent); outline:none; }
-  .wd-table select { appearance:none; cursor:pointer; }
-
-  /* Progress history */
-  .progress-form { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg); padding:18px; margin-bottom:16px; }
-  .progress-form-title { font-family:var(--font-display); font-weight:700; font-size:13px; margin-bottom:14px; }
-  .history-table-wrap { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; }
-  .history-table { width:100%; border-collapse:collapse; }
-  .history-table th { background:var(--bg-base); padding:9px 13px; font-size:10px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted); font-family:var(--font-mono); border-bottom:1px solid var(--border); text-align:left; white-space:nowrap; }
-  .history-table td { padding:10px 13px; border-bottom:1px solid var(--border); font-size:12px; font-family:var(--font-mono); }
-  .history-table tr:last-child td { border-bottom:none; }
-
-  /* Toast */
-  .toast-container { position:fixed; bottom:24px; right:24px; z-index:9999; display:flex; flex-direction:column; gap:8px; pointer-events:none; }
-  .toast { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:11px 16px; font-size:13px; min-width:240px; max-width:360px; box-shadow:var(--shadow); display:flex; align-items:center; gap:10px; animation:toastIn 0.3s ease; pointer-events:all; }
-  .toast.success { border-left:3px solid var(--success); }
-  .toast.error   { border-left:3px solid var(--danger); }
-  .toast.info    { border-left:3px solid var(--info); }
-  @keyframes toastIn { from{ opacity:0; transform:translateX(20px); } to{ opacity:1; transform:translateX(0); } }
-
-  /* Confirm */
-  .confirm-body  { padding:28px 24px; text-align:center; }
-  .confirm-icon  { font-size:40px; margin-bottom:12px; }
-  .confirm-title { font-family:var(--font-display); font-size:18px; font-weight:700; margin-bottom:8px; }
-  .confirm-text  { color:var(--text-muted); font-size:13px; }
-</style>
+        /* --- LOADING OVERLAY --- */
+        #loading-overlay {
+            position: fixed; inset: 0;
+            background: rgba(18,18,20,0.85);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            z-index: 9999; gap: 16px;
+            transition: opacity 0.3s;
+        }
+        #loading-overlay.hidden { opacity:0; pointer-events:none; }
+        .spinner {
+            width: 40px; height: 40px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--accent-color);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
 </head>
 <body>
 
-<div class="loading-overlay hidden" id="loadingOverlay">
-  <div style="text-align:center">
+<div id="loading-overlay">
     <div class="spinner"></div>
-    <div style="margin-top:14px;color:var(--text-muted);font-family:var(--font-mono);font-size:12px" id="loadingText">Loading...</div>
-  </div>
+    <p style="color:var(--text-muted); font-size:13px; text-transform:uppercase; letter-spacing:1px;">Memuat data dari Google Sheets...</p>
 </div>
 
-<div class="toast-container" id="toastContainer"></div>
-
-<div class="app-shell">
-  <header class="header">
-    <div class="header-brand">
-      <div class="header-logo">S~</div>
-      <div>
-        <div class="header-title">S-CURVE PROJECT CONTROL</div>
-        <div class="header-sub">PROJECT SCHEDULE & OVERVIEW SYSTEM</div>
-      </div>
+<header>
+    <div class="brand">
+        <h1>PRASAD SEEDS</h1>
+        <p>Project Monitoring System</p>
     </div>
     <div class="header-actions">
-      <span class="sync-info" id="lastSyncInfo">—</span>
-      <button class="btn-new-project" onclick="openNewProjectModal()">+ New Project</button>
+        <button class="btn btn-secondary" onclick="printSummary()">Print Summary</button>
+        <button class="btn btn-success" onclick="exportPDF()">Export PDF</button>
+        <button class="btn" style="background:#5b21b6; color:#fff;" onclick="openGanttModal()">📊 Gantt</button>
+        <button class="btn btn-warning" id="btn-push-sheets" onclick="pushAllToSheets()">☁ Push to Sheets</button>
+        <button class="btn btn-primary" onclick="openCreateModal()">+ New Project</button>
     </div>
-  </header>
+</header>
 
-  <main class="main-content">
-    <div class="demo-banner hidden" id="demoBanner">
-      ℹ️&nbsp;&nbsp;<strong>Demo Mode</strong> — GAS URL belum dikonfigurasi. Edit konstanta <code>GAS_URL</code> di dalam file HTML ini.
+<div id="sync-status-bar">
+    <div class="sync-indicator">
+        <div class="sync-dot" id="sync-dot"></div>
+        <span id="sync-status-text" style="color:var(--text-muted);">Belum terhubung ke Google Sheets</span>
     </div>
-
-    <div class="summary-grid">
-      <div class="summary-card all"      onclick="filterByStatus('')">
-        <div class="sc-label">Total Projects</div>
-        <div class="sc-value all"       id="statTotal">—</div>
-        <div class="sc-sub">Semua project</div>
-      </div>
-      <div class="summary-card in-prog" onclick="filterByStatus('active')">
-        <div class="sc-label">In Progress</div>
-        <div class="sc-value in-prog"   id="statInProg">—</div>
-        <div class="sc-sub">Sedang berjalan</div>
-      </div>
-      <div class="summary-card on-track" onclick="filterByStatus('On Track')">
-        <div class="sc-label">On Track</div>
-        <div class="sc-value on-track"  id="statOnTrack">—</div>
-        <div class="sc-sub">Variance &ge; 0</div>
-      </div>
-      <div class="summary-card delayed" onclick="filterByStatus('Delayed')">
-        <div class="sc-label">Delayed</div>
-        <div class="sc-value delayed"   id="statDelayed">—</div>
-        <div class="sc-sub">Variance &lt; -5%</div>
-      </div>
-      <div class="summary-card done"    onclick="filterByStatus('Completed')">
-        <div class="sc-label">Completed</div>
-        <div class="sc-value done"      id="statDone">—</div>
-        <div class="sc-sub">Progress 100%</div>
-      </div>
+    <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+        <span class="unsaved-badge" id="unsaved-badge">● Ada perubahan belum disimpan</span>
+        <span id="last-sync-text" style="color:var(--text-muted); font-size:12px;"></span>
+        <button class="btn btn-secondary" style="padding:5px 12px; font-size:12px;" onclick="pullFromSheets()">↻ Refresh dari Sheets</button>
     </div>
+</div>
 
-    <div class="toolbar">
-      <div class="toolbar-search">
-        <span class="search-icon">🔍</span>
-        <input type="text" id="searchInput" placeholder="Cari nama, ID, equipment..." oninput="applyFilters()" />
-      </div>
-      <select id="filterUnit"      onchange="applyFilters()"><option value="">All Units</option></select>
-      <select id="filterArea"      onchange="applyFilters()"><option value="">All Areas</option></select>
-      <select id="filterEquipment" onchange="applyFilters()"><option value="">All Equipment</option></select>
-      <select id="filterStatus"    onchange="applyFilters()">
-        <option value="">All Status</option>
-        <option>Not Started</option><option>In Progress</option>
-        <option>On Track</option><option>Warning</option>
-        <option>Delayed</option><option>Completed</option>
-      </select>
-      <select id="filterMonth" onchange="applyFilters()">
-        <option value="">All Months</option>
-        <option value="1">Jan</option><option value="2">Feb</option><option value="3">Mar</option>
-        <option value="4">Apr</option><option value="5">Mei</option><option value="6">Jun</option>
-        <option value="7">Jul</option><option value="8">Agu</option><option value="9">Sep</option>
-        <option value="10">Okt</option><option value="11">Nov</option><option value="12">Des</option>
-      </select>
-      <select id="filterYear" onchange="applyFilters()"><option value="">All Years</option></select>
-      <button class="btn-clear" onclick="clearFilters()">✕ Reset</button>
-      <button class="btn btn-secondary btn-sm" onclick="loadProjects()">↻ Refresh</button>
+<section class="grid-kpi">
+    <div class="kpi-card kpi-total"><div class="label">Total Project</div><div id="kpi-total-val" class="value">0</div></div>
+    <div class="kpi-card kpi-open"><div class="label">Open Status</div><div id="kpi-open-val" class="value">0</div></div>
+    <div class="kpi-card kpi-progress"><div class="label">On Progress</div><div id="kpi-progress-val" class="value">0</div></div>
+    <div class="kpi-card kpi-closed"><div class="label">Closed Status</div><div id="kpi-closed-val" class="value">0</div></div>
+</section>
+
+<section class="filter-panel">
+    <div class="form-group">
+        <label>Filter by Unit</label>
+        <select id="filter-unit" class="form-control" onchange="handleFilterChange()">
+            <option value="">ALL UNITS</option>
+            <option value="UNIT 1">UNIT 1</option>
+            <option value="UNIT 2">UNIT 2</option>
+        </select>
     </div>
+    <div class="form-group">
+        <label>Filter by Area</label>
+        <select id="filter-area" class="form-control" onchange="handleFilterChange()">
+            <option value="">ALL AREAS</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label>Filter by Month</label>
+        <select id="filter-month" class="form-control" onchange="handleFilterChange()">
+            <option value="">ALL MONTHS</option>
+            <option value="01">January</option><option value="02">February</option>
+            <option value="03">March</option><option value="04">April</option>
+            <option value="05">May</option><option value="06">June</option>
+            <option value="07">July</option><option value="08">August</option>
+            <option value="09">September</option><option value="10">October</option>
+            <option value="11">November</option><option value="12">December</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label>Filter by Status</label>
+        <select id="filter-status" class="form-control" onchange="handleFilterChange()">
+            <option value="">ALL STATUS</option>
+            <option value="OPEN">OPEN</option>
+            <option value="ON PROGRESS">ON PROGRESS</option>
+            <option value="CLOSED">CLOSED</option>
+        </select>
+    </div>
+    <div><button class="btn btn-secondary" style="width:100%;" onclick="resetFilters()">Reset Filters</button></div>
+</section>
 
-    <div class="projects-section">
-      <div class="section-header">
-        <span class="section-title">PROJECT LIST</span>
-        <span class="section-count" id="projectCount">0 projects</span>
-      </div>
-      <div class="table-wrap">
+<section class="charts-main-grid">
+    <div class="chart-container"><h3>Project Status Distribution</h3><div class="chart-wrapper"><canvas id="chart-status"></canvas></div></div>
+    <div class="chart-container"><h3>Project per Unit</h3><div class="chart-wrapper"><canvas id="chart-unit"></canvas></div></div>
+    <div class="chart-container"><h3>Plan vs Actual Progress (%)</h3><div class="chart-wrapper"><canvas id="chart-progress"></canvas></div></div>
+    <div class="chart-container"><h3>Monthly Project Initiation</h3><div class="chart-wrapper"><canvas id="chart-monthly"></canvas></div></div>
+</section>
+
+<section class="table-section">
+    <div class="table-header-box">
+        <h2 style="font-size:16px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Project Workspace Master</h2>
+        <div id="filtered-count" style="font-size:13px; color:var(--text-muted);">Showing 0 entries</div>
+    </div>
+    <div class="table-responsive">
         <table>
-          <thead>
-            <tr>
-              <th>Project ID</th><th>Project Name</th><th>Unit / Area</th><th>Equipment</th>
-              <th>Plan Start</th><th>Plan End</th><th style="min-width:140px">Progress</th>
-              <th>Variance</th><th>Status</th><th>Last Update</th><th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="projectTableBody">
-            <tr><td colspan="11"><div class="empty-state">
-              <div class="empty-icon">📊</div>
-              <div class="empty-title">Belum Ada Project</div>
-              <div class="empty-sub">Klik "+ New Project" untuk memulai.</div>
-            </div></td></tr>
-          </tbody>
+            <thead>
+                <tr>
+                    <th>Project Name</th>
+                    <th>Unit & Area</th>
+                    <th>PIC</th>
+                    <th>Plan %</th>
+                    <th>Actual %</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="project-table-body"></tbody>
         </table>
-      </div>
     </div>
-  </main>
+</section>
+
+<!-- ===== MODAL GANTT EXPORT ===== -->
+<div id="modal-gantt" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 style="text-transform:uppercase; font-size:16px;">📊 Export Gantt Chart (Excel)</h3>
+            <button class="close-modal" onclick="closeModal('modal-gantt')">×</button>
+        </div>
+        <div class="modal-body">
+            <p style="font-size:13px; color:var(--text-muted); margin-bottom:14px;">Pilih project yang ingin di-generate ke Gantt Chart Excel. Format output mengikuti tampilan Project Plan dengan timeline harian.</p>
+            <div class="gantt-select-all-row">
+                <input type="checkbox" id="gantt-check-all" onchange="toggleAllGanttProjects(this)">
+                <label for="gantt-check-all">Pilih Semua Project</label>
+                <span id="gantt-selected-count" style="margin-left:auto; font-size:12px; color:var(--accent-color); font-weight:700;">0 dipilih</span>
+            </div>
+            <div class="gantt-project-list" id="gantt-project-list"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal('modal-gantt')">Batal</button>
+            <button class="btn" style="background:#5b21b6; color:#fff;" onclick="generateGanttExcel()">⬇ Generate & Download Excel</button>
+        </div>
+    </div>
 </div>
 
-<!-- MODAL: NEW/EDIT PROJECT -->
-<div class="modal-backdrop" id="projectFormModal">
-  <div class="modal">
-    <div class="modal-header">
-      <span class="modal-title" id="projectFormTitle">Create New Project</span>
-      <button class="modal-close" onclick="closeModal('projectFormModal')">✕</button>
+<!-- ===== MODAL PRINT PREVIEW ===== -->
+<div id="modal-print-preview" class="modal-overlay">
+    <div class="modal-content" style="max-width:960px; max-height:95vh;">
+        <div class="modal-header">
+            <div>
+                <h3 style="text-transform:uppercase; font-size:16px;">🖨 Print Preview & Export Settings</h3>
+                <p style="font-size:11px; color:var(--accent-color); margin-top:2px;">Atur tampilan sebelum generate PDF</p>
+            </div>
+            <button class="close-modal" onclick="closeModal('modal-print-preview')">×</button>
+        </div>
+        <div class="modal-body" style="display:grid; grid-template-columns:260px 1fr; gap:20px; padding:20px;">
+
+            <!-- PANEL KIRI: KONTROL -->
+            <div style="display:flex; flex-direction:column; gap:14px;">
+
+                <div style="background:#17171c; border:1px solid var(--border-color); border-radius:6px; padding:14px;">
+                    <div style="font-size:11px; text-transform:uppercase; color:var(--text-muted); font-weight:700; margin-bottom:12px; border-bottom:1px solid var(--border-color); padding-bottom:6px;">📄 Kertas & Orientasi</div>
+
+                    <div class="form-group" style="margin-bottom:10px;">
+                        <label>Ukuran Kertas</label>
+                        <select id="pp-paper" class="form-control" onchange="updatePrintPreview()">
+                            <option value="a4">A4 (210 × 297 mm)</option>
+                            <option value="a3">A3 (297 × 420 mm)</option>
+                            <option value="letter">Letter (216 × 279 mm)</option>
+                            <option value="legal">Legal (216 × 356 mm)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Orientasi</label>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:4px;">
+                            <label style="display:flex; align-items:center; gap:6px; cursor:pointer; background:var(--bg-input); border:1px solid var(--border-color); border-radius:4px; padding:8px; font-size:12px; font-weight:normal; text-transform:none;" id="lbl-portrait">
+                                <input type="radio" name="pp-orient" value="portrait" checked onchange="updatePrintPreview()" style="accent-color:var(--accent-color);">
+                                <span>▯ Portrait</span>
+                            </label>
+                            <label style="display:flex; align-items:center; gap:6px; cursor:pointer; background:var(--bg-input); border:1px solid var(--border-color); border-radius:4px; padding:8px; font-size:12px; font-weight:normal; text-transform:none;" id="lbl-landscape">
+                                <input type="radio" name="pp-orient" value="landscape" onchange="updatePrintPreview()" style="accent-color:var(--accent-color);">
+                                <span>▭ Landscape</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background:#17171c; border:1px solid var(--border-color); border-radius:6px; padding:14px;">
+                    <div style="font-size:11px; text-transform:uppercase; color:var(--text-muted); font-weight:700; margin-bottom:12px; border-bottom:1px solid var(--border-color); padding-bottom:6px;">📐 Margin (mm)</div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                        <div class="form-group">
+                            <label>Atas</label>
+                            <input type="number" id="pp-mt" class="form-control" value="12" min="0" max="40" onchange="updatePrintPreview()" style="padding:6px 10px;">
+                        </div>
+                        <div class="form-group">
+                            <label>Bawah</label>
+                            <input type="number" id="pp-mb" class="form-control" value="12" min="0" max="40" onchange="updatePrintPreview()" style="padding:6px 10px;">
+                        </div>
+                        <div class="form-group">
+                            <label>Kiri</label>
+                            <input type="number" id="pp-ml" class="form-control" value="8" min="0" max="40" onchange="updatePrintPreview()" style="padding:6px 10px;">
+                        </div>
+                        <div class="form-group">
+                            <label>Kanan</label>
+                            <input type="number" id="pp-mr" class="form-control" value="8" min="0" max="40" onchange="updatePrintPreview()" style="padding:6px 10px;">
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background:#17171c; border:1px solid var(--border-color); border-radius:6px; padding:14px;">
+                    <div style="font-size:11px; text-transform:uppercase; color:var(--text-muted); font-weight:700; margin-bottom:12px; border-bottom:1px solid var(--border-color); padding-bottom:6px;">🔠 Ukuran Font</div>
+                    <div class="form-group">
+                        <label>Font Size Tabel (px)</label>
+                        <div style="display:flex; align-items:center; gap:10px; margin-top:4px;">
+                            <input type="range" id="pp-fontsize" min="8" max="14" value="10" oninput="document.getElementById('pp-fontsize-val').textContent=this.value+'px'; updatePrintPreview()" style="flex:1; accent-color:var(--accent-color);">
+                            <span id="pp-fontsize-val" style="font-size:12px; font-weight:bold; width:30px;">10px</span>
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top:10px;">
+                        <label>Skala Render</label>
+                        <select id="pp-scale" class="form-control" onchange="updatePrintPreview()">
+                            <option value="1">Normal (1×)</option>
+                            <option value="1.5">Tajam (1.5×)</option>
+                            <option value="2" selected>Ultra HD (2×)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="background:#17171c; border:1px solid var(--border-color); border-radius:6px; padding:14px;">
+                    <div style="font-size:11px; text-transform:uppercase; color:var(--text-muted); font-weight:700; margin-bottom:12px; border-bottom:1px solid var(--border-color); padding-bottom:6px;">⚙ Opsi Konten</div>
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer; margin-bottom:8px; font-size:13px; font-weight:normal; text-transform:none;">
+                        <input type="checkbox" id="pp-show-milestone" checked onchange="updatePrintPreview()" style="accent-color:var(--accent-color); width:15px; height:15px;">
+                        Tampilkan detail milestone
+                    </label>
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer; margin-bottom:8px; font-size:13px; font-weight:normal; text-transform:none;">
+                        <input type="checkbox" id="pp-show-kpi" checked onchange="updatePrintPreview()" style="accent-color:var(--accent-color); width:15px; height:15px;">
+                        Tampilkan KPI summary
+                    </label>
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:13px; font-weight:normal; text-transform:none;">
+                        <input type="checkbox" id="pp-zebra" checked onchange="updatePrintPreview()" style="accent-color:var(--accent-color); width:15px; height:15px;">
+                        Zebra stripe baris tabel
+                    </label>
+                </div>
+
+                <div style="background:rgba(0,173,181,0.08); border:1px solid rgba(0,173,181,0.3); border-radius:6px; padding:12px; font-size:12px; color:var(--text-muted);">
+                    <span style="color:var(--accent-color); font-weight:bold;">💡 Tips:</span> Preview di kanan menunjukkan simulasi tampilan. Rasio halaman menyesuaikan ukuran & orientasi kertas yang dipilih.
+                </div>
+            </div>
+
+            <!-- PANEL KANAN: PREVIEW -->
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:12px; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Preview Halaman</span>
+                    <span id="pp-page-info" style="font-size:11px; color:var(--accent-color);"></span>
+                </div>
+                <div style="flex:1; background:#2a2a2f; border-radius:6px; border:1px solid var(--border-color); padding:16px; display:flex; justify-content:center; align-items:flex-start; overflow-y:auto; min-height:480px;">
+                    <div id="pp-paper-frame" style="background:#fff; box-shadow:0 4px 24px rgba(0,0,0,0.5); transition:all 0.2s; position:relative; overflow:hidden;">
+                        <div id="pp-preview-content" style="transform-origin:top left;"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal('modal-print-preview')">Batal</button>
+            <button class="btn btn-secondary" onclick="doPrintWindow()">🖨 Print Langsung</button>
+            <button class="btn btn-success" onclick="doExportPDFFromPreview()">⬇ Download PDF</button>
+        </div>
     </div>
-    <div class="modal-body">
-      <input type="hidden" id="editProjectId" />
-      <div class="form-grid">
-        <div class="form-group full">
-          <label class="form-label">Project Name *</label>
-          <input type="text" class="form-input" id="fProjectName" placeholder="e.g. FD Fan Replacement - Boiler Unit" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Unit *</label>
-          <input type="text" class="form-input" id="fUnit" placeholder="e.g. UTIL" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Area *</label>
-          <input type="text" class="form-input" id="fArea" placeholder="e.g. BOILER" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Equipment *</label>
-          <input type="text" class="form-input" id="fEquipment" placeholder="e.g. FD-FAN" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Total Value (%)</label>
-          <input type="number" class="form-input" id="fTotalValue" value="100" min="0" max="100" step="0.01"/>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Plan Start *</label>
-          <input type="date" class="form-input" id="fPlanStart" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Plan End *</label>
-          <input type="date" class="form-input" id="fPlanEnd" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Actual Start</label>
-          <input type="date" class="form-input" id="fActualStart" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Actual End</label>
-          <input type="date" class="form-input" id="fActualEnd" />
-        </div>
-        <div class="form-group full">
-          <label class="form-label">Remarks</label>
-          <textarea class="form-input" id="fRemarks" placeholder="Catatan opsional..."></textarea>
-        </div>
-      </div>
-      <div class="wd-section">
-        <div class="wd-section-header">
-          <span class="wd-section-title">Work Details</span>
-          <button class="btn-add-wd" onclick="addWdRow()">+ Add Work Detail</button>
-        </div>
-        <div class="wd-rows" id="wdRows"></div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeModal('projectFormModal')">Batal</button>
-      <button class="btn btn-primary" id="saveProjectBtn" onclick="saveProject()">Buat Project</button>
-    </div>
-  </div>
 </div>
 
-<!-- MODAL: PROJECT DETAIL -->
-<div class="modal-backdrop" id="projectDetailModal">
-  <div class="modal modal-lg">
-    <div class="modal-header">
-      <div>
-        <div class="modal-title" id="detailTitle">Project Detail</div>
-        <div style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);margin-top:2px" id="detailSubtitle"></div>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <button class="btn btn-danger btn-sm" onclick="confirmDeleteProject()">Delete</button>
-        <button class="modal-close" onclick="closeModal('projectDetailModal')">✕</button>
-      </div>
+<div id="modal-create" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 style="text-transform:uppercase; font-size:16px;">Create Structural Project</h3>
+            <button class="close-modal" onclick="closeModal('modal-create')">&times;</button>
+        </div>
+        <form id="form-create-project" onsubmit="saveNewProject(event)">
+            <div class="modal-body" style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+                <div class="form-group" style="grid-column:span 2;">
+                    <label>Project Name *</label>
+                    <input type="text" id="p-name" class="form-control" required placeholder="Contoh: Overhaul Mechanical Dryer S1">
+                </div>
+                <div class="form-group">
+                    <label>Unit *</label>
+                    <select id="p-unit" class="form-control" required onchange="handleModalUnitChange('p-unit','p-area')">
+                        <option value="UNIT 1">UNIT 1</option>
+                        <option value="UNIT 2">UNIT 2</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Area *</label>
+                    <select id="p-area" class="form-control" required></select>
+                </div>
+                <div class="form-group" style="grid-column:span 2;">
+                    <label>PIC Structural *</label>
+                    <input type="text" id="p-pic" class="form-control" required placeholder="Nama Penanggung Jawab">
+                </div>
+                <div class="form-group">
+                    <label>Start Date *</label>
+                    <input type="date" id="p-start" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Due Date *</label>
+                    <input type="date" id="p-due" class="form-control" required>
+                </div>
+                <div class="form-group" style="grid-column:span 2;">
+                    <label>Detail Pekerjaan / Scope of Work</label>
+                    <textarea id="p-detail" class="form-control" rows="3" placeholder="Deskripsikan detail scope teknis pengerjaan proyek di sini..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('modal-create')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Generate Project</button>
+            </div>
+        </form>
     </div>
-    <div class="modal-body">
-      <div class="detail-tabs">
-        <div class="detail-tab active" data-tab="tabOverview"    onclick="switchTab(this)">Overview &amp; S-Curve</div>
-        <div class="detail-tab"        data-tab="tabWorkDetails" onclick="switchTab(this)">Work Details</div>
-        <div class="detail-tab"        data-tab="tabProgress"    onclick="switchTab(this)">Progress History</div>
-      </div>
-
-      <!-- Tab: Overview -->
-      <div class="tab-content active" id="tabOverview">
-        <div class="info-grid" id="detailInfoGrid"></div>
-        <div class="chart-container">
-          <div class="chart-header">
-            <div class="chart-title">📈 S-CURVE — RENCANA vs AKTUAL</div>
-            <div class="chart-kpis">
-              <div class="kpi-item"><div class="kpi-label">Rencana Hari Ini</div><div class="kpi-value plan"   id="kpiPlan">—</div></div>
-              <div class="kpi-item"><div class="kpi-label">Aktual Hari Ini</div> <div class="kpi-value actual" id="kpiActual">—</div></div>
-              <div class="kpi-item"><div class="kpi-label">Variance</div>        <div class="kpi-value"        id="kpiVariance">—</div></div>
-            </div>
-          </div>
-          <div class="chart-canvas-wrap"><canvas id="scurveChart"></canvas></div>
-        </div>
-      </div>
-
-      <!-- Tab: Work Details -->
-      <div class="tab-content" id="tabWorkDetails">
-        <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:12px">
-          <button class="btn-add-wd" onclick="addDetailWdRow()">+ Add Work Detail</button>
-          <button class="btn btn-success btn-sm" onclick="saveWorkDetails()">💾 Save Changes</button>
-        </div>
-        <div class="wd-table-wrap">
-          <table class="wd-table">
-            <thead><tr>
-              <th>#</th><th>Nama Work Detail</th><th>PIC</th>
-              <th>Plan Start</th><th>Plan End</th><th>Act. Start</th><th>Act. End</th>
-              <th>Weight%</th><th>Progress%</th><th>Status</th><th>Notes</th><th>Del</th>
-            </tr></thead>
-            <tbody id="detailWdBody"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Tab: Progress History -->
-      <div class="tab-content" id="tabProgress">
-        <div class="progress-form">
-          <div class="progress-form-title">Submit Progress Update</div>
-          <div class="form-grid">
-            <div class="form-group">
-              <label class="form-label">Work Detail *</label>
-              <select class="form-input" id="phWd"><option value="">Pilih Work Detail</option></select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Week Number</label>
-              <input type="number" class="form-input" id="phWeek" min="1" max="53" placeholder="15"/>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Update Date *</label>
-              <input type="date" class="form-input" id="phDate" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Progress Input (%) *</label>
-              <input type="number" class="form-input" id="phProgress" min="0" max="100" step="0.01" placeholder="0.00"/>
-            </div>
-            <div class="form-group full">
-              <label class="form-label">Notes</label>
-              <input type="text" class="form-input" id="phNotes" placeholder="Catatan opsional..." />
-            </div>
-          </div>
-          <div style="margin-top:12px;display:flex;justify-content:flex-end">
-            <button class="btn btn-primary" onclick="submitProgress()">Submit Progress</button>
-          </div>
-        </div>
-        <div class="history-table-wrap">
-          <table class="history-table">
-            <thead><tr>
-              <th>History ID</th><th>Work Detail ID</th><th>Week</th>
-              <th>Update Date</th><th>Input%</th><th>Cumulative%</th><th>Notes</th>
-            </tr></thead>
-            <tbody id="historyBody">
-              <tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-muted)">Belum ada history.</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
 </div>
 
-<!-- MODAL: CONFIRM DELETE -->
-<div class="modal-backdrop" id="confirmModal">
-  <div class="modal modal-sm">
-    <div class="confirm-body">
-      <div class="confirm-icon">⚠️</div>
-      <div class="confirm-title">Hapus Project?</div>
-      <div class="confirm-text" id="confirmText"></div>
+<div id="modal-detail" class="modal-overlay">
+    <div class="modal-content" style="max-width:950px;">
+        <div class="modal-header">
+            <div>
+                <h3 id="det-title" style="text-transform:uppercase; font-size:16px; color:#fff;">Project Details</h3>
+                <p id="det-meta" style="font-size:12px; color:var(--accent-color); font-weight:bold; margin-top:2px;"></p>
+            </div>
+            <button class="close-modal" onclick="closeModal('modal-detail')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="det-stepper" class="stepper-container"></div>
+            <div class="detail-split-grid">
+                <div style="background:#17171c; padding:15px; border-radius:6px; border:1px solid var(--border-color); display:flex; flex-direction:column; gap:12px;">
+                    <h4 style="font-size:12px; text-transform:uppercase; color:var(--text-muted); border-bottom:1px solid var(--border-color); padding-bottom:5px;">Scope Configuration</h4>
+                    <div><span style="font-size:11px; color:var(--text-muted); display:block; text-transform:uppercase;">PIC Assignment</span><span id="det-pic" style="font-weight:600; font-size:14px;">-</span></div>
+                    <div><span style="font-size:11px; color:var(--text-muted); display:block; text-transform:uppercase;">Timeline Schedule</span><span id="det-timeline" style="font-size:13px;">-</span></div>
+                    <div><span style="font-size:11px; color:var(--text-muted); display:block; text-transform:uppercase;">Plan Metric</span><span id="det-plan-pct" style="font-weight:600; font-size:14px; color:#fff;">0%</span></div>
+                    <div>
+                        <span style="font-size:11px; color:var(--text-muted); display:block; text-transform:uppercase;">Calculated Actual Status</span>
+                        <div style="display:flex; align-items:center; gap:10px; margin-top:2px;">
+                            <span id="det-actual-pct" style="font-weight:bold; font-size:18px; color:var(--accent-color);">0%</span>
+                            <span id="det-status-badge"></span>
+                        </div>
+                    </div>
+                </div>
+                <div style="background:#17171c; padding:15px; border-radius:6px; border:1px solid var(--border-color); display:flex; flex-direction:column; gap:10px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:5px;">
+                        <h4 style="font-size:12px; text-transform:uppercase; color:var(--text-muted);">Status Update / Scope Description</h4>
+                        <button class="btn btn-primary" id="btn-update-scope" style="padding:4px 10px; font-size:11px;" onclick="updateProjectScopeDescription()">Update Status Pekerjaan</button>
+                    </div>
+                    <textarea id="det-desc" class="form-control" rows="6" style="resize:vertical; min-height:120px; font-size:13px; line-height:1.5; background-color: #121214;" placeholder="Tulis update progress pekerjaan atau rubah deskripsi scope di sini..."></textarea>
+                </div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+                <h4 style="text-transform:uppercase; font-size:13px; letter-spacing:0.5px; color:var(--text-muted);">Milestone Management Controls</h4>
+                <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                    <span class="unsaved-badge" id="detail-unsaved-badge">● Belum disimpan ke Sheets</span>
+                    <button class="btn btn-primary" style="padding:5px 12px; font-size:12px;" onclick="addNewMilestoneToCurrent()">+ Add Milestone</button>
+                    <button class="btn btn-warning" style="padding:5px 12px; font-size:12px;" id="btn-submit-detail" onclick="submitCurrentProjectToSheets()">☁ Submit to Sheets</button>
+                </div>
+            </div>
+            <div id="milestone-rows-container" class="milestone-editor-list"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-danger" id="btn-delete-project" style="margin-right:auto;">Delete Project</button>
+            <button class="btn btn-secondary" onclick="closeModal('modal-detail')">Close</button>
+        </div>
     </div>
-    <div class="modal-footer" style="justify-content:center">
-      <button class="btn btn-secondary" onclick="closeModal('confirmModal')">Batal</button>
-      <button class="btn btn-danger" id="confirmDeleteBtn">Hapus Permanen</button>
+</div>
+
+<div id="pdf-template">
+    <div style="text-align:center; border-bottom:3px double #111; padding-bottom:15px; margin-bottom:25px;">
+        <h1 style="font-size:26px; font-weight:bold; margin:0;">PRASAD SEEDS</h1>
+        <h2 style="font-size:16px; font-weight:normal; margin:5px 0 0 0; text-transform:uppercase; letter-spacing:2px;">Project Monitoring Summary Report</h2>
+        <p style="font-size:11px; margin-top:10px;" id="pdf-generated-date"></p>
+        <p style="font-size:11px; font-weight:bold; background:#eee; padding:5px; display:inline-block; margin-top:5px;" id="pdf-active-filters"></p>
     </div>
-  </div>
+    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:15px; margin-bottom:30px; text-align:center;">
+        <div style="border:1px solid #111; padding:10px;"><div style="font-size:11px; text-transform:uppercase; font-weight:bold;">Total Projects</div><div id="pdf-kpi-total" style="font-size:20px; font-weight:bold;">0</div></div>
+        <div style="border:1px solid #111; padding:10px;"><div style="font-size:11px; text-transform:uppercase; font-weight:bold;">Open</div><div id="pdf-kpi-open" style="font-size:20px; font-weight:bold;">0</div></div>
+        <div style="border:1px solid #111; padding:10px;"><div style="font-size:11px; text-transform:uppercase; font-weight:bold;">On Progress</div><div id="pdf-kpi-progress" style="font-size:20px; font-weight:bold;">0</div></div>
+        <div style="border:1px solid #111; padding:10px;"><div style="font-size:11px; text-transform:uppercase; font-weight:bold;">Closed</div><div id="pdf-kpi-closed" style="font-size:20px; font-weight:bold;">0</div></div>
+    </div>
+    <h3 style="font-size:14px; text-transform:uppercase; border-bottom:2px solid #111; padding-bottom:5px; margin-bottom:15px;">Project Implementation Registry</h3>
+    <table style="width:100%; border-collapse:collapse; font-size:10px; margin-bottom:30px; table-layout:fixed;">
+        <colgroup>
+            <col style="width:28%;">
+            <col style="width:8%;">
+            <col style="width:9%;">
+            <col style="width:13%;">
+            <col style="width:8%;">
+            <col style="width:25%;">
+            <col style="width:9%;">
+        </colgroup>
+        <thead>
+            <tr style="background:#1a3a6b;">
+                <th style="color:#fff; padding:8px 6px; text-align:left; font-size:10px; font-weight:700; border:1px solid #1a3a6b;">Project Name</th>
+                <th style="color:#fff; padding:8px 6px; text-align:center; font-size:10px; font-weight:700; border:1px solid #1a3a6b;">Unit</th>
+                <th style="color:#fff; padding:8px 6px; text-align:center; font-size:10px; font-weight:700; border:1px solid #1a3a6b;">Area</th>
+                <th style="color:#fff; padding:8px 6px; text-align:center; font-size:10px; font-weight:700; border:1px solid #1a3a6b;">PIC</th>
+                <th style="color:#fff; padding:8px 4px; text-align:center; font-size:10px; font-weight:700; border:1px solid #1a3a6b;">Plan %</th>
+                <th style="color:#fff; padding:8px 6px; text-align:center; font-size:10px; font-weight:700; border:1px solid #1a3a6b;">Actual Progress</th>
+                <th style="color:#fff; padding:8px 4px; text-align:center; font-size:10px; font-weight:700; border:1px solid #1a3a6b;">Status</th>
+            </tr>
+        </thead>
+        <tbody id="pdf-table-body"></tbody>
+    </table>
+    <div style="page-break-before:always;"></div>
+    <h3 style="font-size:14px; text-transform:uppercase; border-bottom:2px solid #111; padding-bottom:5px; margin-bottom:20px;">Granular Scope & Milestone Details</h3>
+    <div id="pdf-detailed-blocks"></div>
 </div>
 
 <script>
-// GAS Config Cuy
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbzV1rEXFAwogUnoBXDYcbxtP3XmkWRexyhwOMW_dpEeWbWad9IgJMI1NsrnSEO8NiHfZA/exec';
 // ============================================================
-
-// ── State
-let allProjects    = [];
-let currentDetail  = null;   // { project, workDetails, history }
-let detailWds      = [];     // editable WD copy in detail modal
-let scurveInstance = null;
-let wdCounter      = 0;
-
-// ── Demo mode: GAS_URL not configured
-const IS_DEMO = !GAS_URL || GAS_URL.includes('GANTI_DENGAN');
-
-// ── Mock storage (demo mode)
-let mProjects = [], mWds = [], mHistory = [], mSeq = 1;
+//  CONFIGURATION — GANTI URL INI SETELAH DEPLOY GAS
+// ============================================================
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzUceHHxrIjhLe9BhIwPun6MZxfrAWFDEfERKiqUEPrgx4c6CJiwoFizKTI1k_A1Yb5XA/exec";
 
 // ============================================================
-// INIT
+//  CONSTANTS
 // ============================================================
-document.addEventListener('DOMContentLoaded', () => {
-  if(IS_DEMO) document.getElementById('demoBanner').classList.remove('hidden');
-  registerTodayPlugin();
-  populateYearFilter();
-  // Set default values for progress form
-  document.getElementById('phDate').value = todayStr();
-  document.getElementById('phWeek').value = isoWeek(new Date());
-  loadProjects();
-});
+const UNIT_AREAS = {
+    "UNIT 1": ["Prairie","Peanut","Petkus","CTP1","CTP2","Utility","Other"],
+    "UNIT 2": ["PS Dryer","SPR Dryer","Peanut","CTP1","CTP2","Utility","Other"]
+};
+const DEFAULT_MILESTONES = ["Planning","Material","Execution","Testing","Finish"];
 
-function todayStr() { return new Date().toISOString().split('T')[0]; }
+// ============================================================
+//  STATE
+// ============================================================
+let projects = [];
+let activeDetailProjectId = null;
+let globalCharts = {};
 
-function isoWeek(d) {
-  const dt = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-  dt.setUTCDate(dt.getUTCDate() + 4 - (dt.getUTCDay() || 7));
-  const y1 = new Date(Date.UTC(dt.getUTCFullYear(), 0, 1));
-  return Math.ceil((((dt - y1) / 86400000) + 1) / 7);
+// Track slider debounce per milestone untuk mencegah flood request
+let sliderDebounceTimers = {};
+// Track previous milestone values untuk kirim oldProgress ke GAS
+let prevMilestoneProgress = {};
+
+// ============================================================
+//  SYNC HELPERS
+// ============================================================
+function setSyncStatus(state, text) {
+    const dot  = document.getElementById('sync-dot');
+    const label = document.getElementById('sync-status-text');
+    dot.className = 'sync-dot ' + state;
+    label.textContent = text;
 }
 
-function populateYearFilter() {
-  const sel = document.getElementById('filterYear');
-  const yr  = new Date().getFullYear();
-  for(let y = yr + 1; y >= yr - 5; y--) {
-    const o = document.createElement('option');
-    o.value = y; o.textContent = y; sel.appendChild(o);
-  }
+function setLastSync() {
+    const el = document.getElementById('last-sync-text');
+    el.textContent = 'Terakhir sync: ' + new Date().toLocaleTimeString('id-ID');
 }
 
-// ============================================================
-// TODAY-LINE CHART PLUGIN (singleton — register exactly once)
-// ============================================================
-let _todayPluginIdx = 0;
-function registerTodayPlugin() {
-  Chart.register({
-    id: 'todayLine',
-    afterDraw(chart) {
-      const idx  = chart.__todayIdx || 0;
-      const meta = chart.getDatasetMeta(0);
-      if(!meta || !meta.data || !meta.data[idx]) return;
-      const x  = meta.data[idx].x;
-      const ca = chart.chartArea;
-      const ctx = chart.ctx;
-      ctx.save();
-      ctx.setLineDash([5, 4]);
-      ctx.strokeStyle = 'rgba(245,166,35,0.55)';
-      ctx.lineWidth   = 1.5;
-      ctx.beginPath(); ctx.moveTo(x, ca.top); ctx.lineTo(x, ca.bottom); ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.fillStyle = 'rgba(245,166,35,0.85)';
-      ctx.font = '10px DM Mono, monospace';
-      ctx.fillText('Hari ini', x + 4, ca.top + 14);
-      ctx.restore();
-    }
-  });
+function markUnsaved(show) {
+    document.getElementById('unsaved-badge').classList.toggle('visible', show);
+    document.getElementById('detail-unsaved-badge').classList.toggle('visible', show);
 }
 
 // ============================================================
-// API
+//  GAS API CALLER
 // ============================================================
-async function apiGet(action, params = {}) {
-  if(IS_DEMO) return mockGet(action, params);
-  const url = new URL(GAS_URL);
-  url.searchParams.set('action', action);
-  // kirim params dua cara: langsung dan via payload (fallback)
-  Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, String(v)));
-  url.searchParams.set('payload', JSON.stringify(params));
-  const res = await fetch(url.toString(), { method: 'GET', mode: 'cors' });
-  if(!res.ok) throw new Error('HTTP ' + res.status);
-  return res.json();
+async function gasGet(params) {
+    if (!SCRIPT_URL || SCRIPT_URL === "YOUR_GAS_WEB_APP_URL_HERE") return null;
+    const url = SCRIPT_URL + "?" + new URLSearchParams(params).toString();
+    const res = await fetch(url);
+    return await res.json();
 }
 
-async function apiPost(action, data) {
-  if(IS_DEMO) return mockPost(action, data);
-  const url = new URL(GAS_URL);
-  url.searchParams.set('action', action);
-  url.searchParams.set('payload', JSON.stringify(data));
-  const res = await fetch(url.toString(), { method: 'GET', mode: 'cors' });
-  if(!res.ok) throw new Error('HTTP ' + res.status);
-  return res.json();
-}
-
-// ============================================================
-// MOCK ENGINE
-// ============================================================
-function mockGet(action, params) {
-  if(action === 'getProjects') return { success: true, data: mProjects };
-  if(action === 'getProjectDetail') {
-    const p = mProjects.find(x => x.projectId === params.projectId);
-    if(!p) return { success: false, error: 'Project tidak ditemukan' };
-    return { success: true, data: {
-      project:     p,
-      workDetails: mWds.filter(x => x.projectId === params.projectId),
-      history:     mHistory.filter(x => x.projectId === params.projectId)
-    }};
-  }
-  return { success: false, error: 'Unknown action' };
-}
-
-function mockPost(action, data) {
-  if(action === 'createProject') {
-    const now  = new Date();
-    const mm   = String(now.getMonth() + 1).padStart(2, '0');
-    const yyyy = now.getFullYear();
-    const run  = String(mSeq++).padStart(3, '0');
-    const id   = `${data.unit}/${data.area}/${data.equipment}/${mm}/${yyyy}/${run}`;
-    mProjects.push({
-      projectId: id, projectName: data.projectName,
-      unit: data.unit, area: data.area, equipment: data.equipment,
-      planStart: data.planStart, planEnd: data.planEnd,
-      actualStart: data.actualStart || '', actualEnd: data.actualEnd || '',
-      totalValue: parseFloat(data.totalValue) || 100,
-      weekPlan: diffWeeks(data.planStart, data.planEnd),
-      weekActual: diffWeeks(data.actualStart, data.actualEnd),
-      plannedProgressToday: plannedNow(data.planStart, data.planEnd),
-      actualProgress: 0, variance: 0,
-      status: data.actualStart ? 'In Progress' : 'Not Started',
-      lastUpdate: todayStr(), remarks: data.remarks || ''
+async function gasPost(body) {
+    if (!SCRIPT_URL || SCRIPT_URL === "YOUR_GAS_WEB_APP_URL_HERE") return null;
+    const form = new FormData();
+    form.append("payload", JSON.stringify(body));
+    const res = await fetch(SCRIPT_URL, {
+        method: "POST",
+        body: form
     });
-    (data.workDetails || []).forEach((wd, i) => {
-      if(!wd.name) return;
-      mWds.push({
-        workDetailId: `WD-${id}-${String(i+1).padStart(2,'0')}`,
-        projectId: id, workDetailName: wd.name, pic: wd.pic || '',
-        planStart: wd.planStart||'', planEnd: wd.planEnd||'',
-        actualStart:'', actualEnd:'',
-        weight: parseFloat(wd.weight)||0, progress:0, status:'Not Started', notes: wd.notes||''
-      });
-    });
-    mockRecalc(id);
-    return { success: true, projectId: id };
-  }
-
-  if(action === 'updateProject') {
-    const idx = mProjects.findIndex(x => x.projectId === data.projectId);
-    if(idx < 0) return { success: false, error: 'Not found' };
-    ['projectName','unit','area','equipment','totalValue','planStart','planEnd','actualStart','actualEnd','remarks']
-      .forEach(k => { if(data[k] !== undefined) mProjects[idx][k] = data[k]; });
-    if(data.workDetails !== undefined) {
-      mWds = mWds.filter(x => x.projectId !== data.projectId);
-      data.workDetails.forEach((wd, i) => {
-        mWds.push({
-          workDetailId: wd.workDetailId || `WD-${data.projectId}-${String(i+1).padStart(2,'0')}`,
-          projectId: data.projectId,
-          workDetailName: wd.workDetailName || wd.name || '',
-          pic: wd.pic||'', planStart: wd.planStart||'', planEnd: wd.planEnd||'',
-          actualStart: wd.actualStart||'', actualEnd: wd.actualEnd||'',
-          weight: parseFloat(wd.weight)||0, progress: parseFloat(wd.progress)||0,
-          status: wd.status||'Not Started', notes: wd.notes||''
-        });
-      });
-    }
-    mockRecalc(data.projectId);
-    return { success: true };
-  }
-
-  if(action === 'addProgressHistory') {
-    const wd = mWds.find(x => x.workDetailId === data.workDetailId);
-    if(!wd) return { success: false, error: 'Work detail tidak ditemukan' };
-    const prev  = mHistory.filter(x => x.workDetailId === data.workDetailId);
-    const lastC = prev.length ? parseFloat(prev[prev.length-1].cumulativeProgress)||0 : 0;
-    const input = parseFloat(data.progressInput)||0;
-    const cumul = Math.min(100, Math.round((lastC + input) * 100) / 100);
-    mHistory.push({
-      historyId: 'HIST-' + Date.now(),
-      projectId: data.projectId, workDetailId: data.workDetailId,
-      weekNumber: data.weekNumber, updateDate: data.updateDate,
-      progressInput: input, cumulativeProgress: cumul, notes: data.notes||''
-    });
-    wd.progress = cumul;
-    wd.status   = cumul >= 100 ? 'Completed' : 'In Progress';
-    if(!wd.actualStart) wd.actualStart = data.updateDate;
-    if(cumul >= 100)    wd.actualEnd   = data.updateDate;
-    const proj = mProjects.find(x => x.projectId === data.projectId);
-    if(proj && !proj.actualStart) proj.actualStart = data.updateDate;
-    mockRecalc(data.projectId);
-    return { success: true, cumulativeProgress: cumul };
-  }
-
-  if(action === 'deleteProject') {
-    mProjects = mProjects.filter(x => x.projectId !== data.projectId);
-    mWds      = mWds.filter(x => x.projectId !== data.projectId);
-    mHistory  = mHistory.filter(x => x.projectId !== data.projectId);
-    return { success: true };
-  }
-  return { success: false, error: 'Unknown action' };
-}
-
-function diffWeeks(s, e) {
-  if(!s || !e) return 0;
-  const d = new Date(e) - new Date(s);
-  return Math.max(0, Math.round(d / (1000*60*60*24*7)));
-}
-
-function plannedNow(ps, pe) {
-  if(!ps || !pe) return 0;
-  const today = new Date(); today.setHours(0,0,0,0);
-  const s = new Date(ps), e = new Date(pe);
-  if(today <= s) return 0;
-  if(today >= e) return 100;
-  return Math.round((today - s) / (e - s) * 10000) / 100;
-}
-
-function mockRecalc(pid) {
-  const p = mProjects.find(x => x.projectId === pid);
-  if(!p) return;
-  const wds    = mWds.filter(x => x.projectId === pid);
-  const totalW = wds.reduce((s, w) => s + (parseFloat(w.weight)||0), 0);
-  p.actualProgress = totalW > 0
-    ? Math.round(wds.reduce((s, w) => s + (parseFloat(w.progress)||0)*(parseFloat(w.weight)||0), 0) / totalW * 100) / 100
-    : 0;
-  p.plannedProgressToday = plannedNow(p.planStart, p.planEnd);
-  p.variance   = Math.round((p.actualProgress - p.plannedProgressToday) * 100) / 100;
-  p.weekPlan   = diffWeeks(p.planStart, p.planEnd);
-  p.weekActual = diffWeeks(p.actualStart, p.actualEnd);
-  // Correct status order (bug fix)
-  if(p.actualProgress >= 100) p.status = 'Completed';
-  else if(!p.actualStart)     p.status = 'Not Started';
-  else if(p.variance >= 0)    p.status = 'On Track';
-  else if(p.variance >= -5)   p.status = 'Warning';
-  else                        p.status = 'Delayed';
-  p.lastUpdate = todayStr();
+    return await res.json();
 }
 
 // ============================================================
-// LOAD & RENDER
+//  PULL: Auto-load data dari Sheets saat halaman dibuka
 // ============================================================
-async function loadProjects() {
-  showLoading('Memuat data project...');
-  try {
-    const r = await apiGet('getProjects');
-    if(r.success) {
-      allProjects = r.data || [];
-      populateFilterOptions();
-      renderProjects(allProjects);
-      updateCards(allProjects);
-      document.getElementById('lastSyncInfo').textContent =
-        IS_DEMO ? 'Demo Mode' : 'Diperbarui ' + new Date().toLocaleTimeString('id-ID');
-    } else { showToast('Gagal memuat: ' + (r.error||''), 'error'); }
-  } catch(e) { showToast('Koneksi error: ' + e.message, 'error'); }
-  finally { hideLoading(); }
-}
-
-function populateFilterOptions() {
-  const u = key => [...new Set(allProjects.map(p => p[key]).filter(Boolean))].sort();
-  fillSelect('filterUnit',      u('unit'),      'All Units');
-  fillSelect('filterArea',      u('area'),      'All Areas');
-  fillSelect('filterEquipment', u('equipment'), 'All Equipment');
-}
-
-function fillSelect(id, opts, placeholder) {
-  const sel = document.getElementById(id);
-  const cur = sel.value;
-  sel.innerHTML = `<option value="">${placeholder}</option>`;
-  opts.forEach(o => {
-    const el = document.createElement('option');
-    el.value = o; el.textContent = o;
-    if(o === cur) el.selected = true;
-    sel.appendChild(el);
-  });
-}
-
-function updateCards(p) {
-  document.getElementById('statTotal').textContent   = p.length;
-  document.getElementById('statInProg').textContent  = p.filter(x => ['In Progress','On Track','Warning','Delayed'].includes(x.status)).length;
-  document.getElementById('statOnTrack').textContent = p.filter(x => x.status === 'On Track').length;
-  document.getElementById('statDelayed').textContent = p.filter(x => x.status === 'Delayed').length;
-  document.getElementById('statDone').textContent    = p.filter(x => x.status === 'Completed').length;
-}
-
-function filterByStatus(status) {
-  if(status === 'active') {
-    document.getElementById('filterStatus').value = '';
-    renderProjects(allProjects.filter(p => ['In Progress','On Track','Warning','Delayed'].includes(p.status)));
-    return;
-  }
-  document.getElementById('filterStatus').value = status;
-  applyFilters();
-}
-
-function applyFilters() {
-  const q     = document.getElementById('searchInput').value.toLowerCase();
-  const unit  = document.getElementById('filterUnit').value;
-  const area  = document.getElementById('filterArea').value;
-  const equip = document.getElementById('filterEquipment').value;
-  const stat  = document.getElementById('filterStatus').value;
-  const mo    = document.getElementById('filterMonth').value;
-  const yr    = document.getElementById('filterYear').value;
-  renderProjects(allProjects.filter(p => {
-    if(q && !((p.projectId||'').toLowerCase().includes(q)||
-              (p.projectName||'').toLowerCase().includes(q)||
-              (p.equipment||'').toLowerCase().includes(q)||
-              (p.unit||'').toLowerCase().includes(q)||
-              (p.area||'').toLowerCase().includes(q))) return false;
-    if(unit  && p.unit      !== unit)  return false;
-    if(area  && p.area      !== area)  return false;
-    if(equip && p.equipment !== equip) return false;
-    if(stat  && p.status    !== stat)  return false;
-    if(mo || yr) {
-      const d = p.planStart ? new Date(p.planStart + 'T00:00:00') : null;
-      if(!d || isNaN(d)) return false;
-      if(mo && String(d.getMonth()+1) !== mo) return false;
-      if(yr && String(d.getFullYear()) !== yr) return false;
-    }
-    return true;
-  }));
-}
-
-function clearFilters() {
-  document.getElementById('searchInput').value = '';
-  ['filterUnit','filterArea','filterEquipment','filterStatus','filterMonth','filterYear']
-    .forEach(id => document.getElementById(id).value = '');
-  renderProjects(allProjects);
-}
-
-function renderProjects(projects) {
-  const tbody = document.getElementById('projectTableBody');
-  document.getElementById('projectCount').textContent = projects.length + ' project' + (projects.length !== 1 ? 's' : '');
-  if(!projects.length) {
-    tbody.innerHTML = `<tr><td colspan="11"><div class="empty-state">
-      <div class="empty-icon">🔍</div><div class="empty-title">Tidak Ada Project</div>
-      <div class="empty-sub">Ubah filter atau tambah project baru.</div>
-    </div></td></tr>`; return;
-  }
-  tbody.innerHTML = projects.map(p => {
-    const plan = parseFloat(p.plannedProgressToday)||0;
-    const act  = parseFloat(p.actualProgress)||0;
-    const vari = parseFloat(p.variance)||0;
-    const barC = act >= plan ? '#22c55e' : vari >= -5 ? '#eab308' : '#ef4444';
-    // FIX: variance class — variance===0 maps to 'zero', not 'warn'
-    const vCls = vari > 0 ? 'pos' : vari === 0 ? 'zero' : vari >= -5 ? 'warn' : 'neg';
-    const vSgn = vari > 0 ? '+' : '';
-    // FIX: status class — replace ALL spaces, lowercase
-    const sCls = (p.status||'').toLowerCase().replace(/\s+/g, '-');
-    const safeId = encodeURIComponent(p.projectId);
-    return `<tr onclick="openDetail('${safeId}')">
-      <td class="td-id" title="${esc(p.projectId)}">${esc(p.projectId)}</td>
-      <td class="td-name">${esc(p.projectName)}</td>
-      <td><span class="td-meta">${esc(p.unit||'')} / ${esc(p.area||'')}</span></td>
-      <td class="td-meta">${esc(p.equipment||'')}</td>
-      <td class="td-date">${fmtDate(p.planStart)}</td>
-      <td class="td-date">${fmtDate(p.planEnd)}</td>
-      <td>
-        <div class="progress-wrap">
-          <div class="progress-track">
-            <div class="progress-fill" style="width:${Math.min(100,act).toFixed(1)}%;background:${barC}"></div>
-          </div>
-          <div class="progress-nums">
-            <span style="color:var(--text-muted)">P:${plan.toFixed(1)}%</span>
-            <span style="color:var(--text-primary)">A:${act.toFixed(1)}%</span>
-          </div>
-        </div>
-      </td>
-      <td><span class="variance ${vCls}">${vSgn}${vari.toFixed(1)}%</span></td>
-      <td><span class="status-badge ${sCls}">${esc(p.status||'—')}</span></td>
-      <td class="td-date">${fmtDate(p.lastUpdate)}</td>
-      <td onclick="event.stopPropagation()">
-        <button class="btn-action" onclick="openEditModal('${safeId}')">Edit</button>
-      </td>
-    </tr>`;
-  }).join('');
-}
-
-// ============================================================
-// PROJECT DETAIL
-// ============================================================
-async function openDetail(encodedId) {
-  const pid = decodeURIComponent(encodedId);
-  showLoading('Memuat detail project...');
-  try {
-    const r = await apiGet('getProjectDetail', { projectId: pid });
-    if(r.success) {
-      currentDetail = r.data;
-      detailWds     = JSON.parse(JSON.stringify(r.data.workDetails || []));
-      renderDetail(r.data);
-      openModal('projectDetailModal');
-    } else { showToast('Error: ' + (r.error||''), 'error'); }
-  } catch(e) { showToast('Error: ' + e.message, 'error'); }
-  finally { hideLoading(); }
-}
-
-function renderDetail(data) {
-  const { project: p, workDetails: wds, history: hist } = data;
-  document.getElementById('detailTitle').textContent    = p.projectName || '—';
-  document.getElementById('detailSubtitle').textContent = p.projectId   || '—';
-
-  const plan = parseFloat(p.plannedProgressToday)||0;
-  const act  = parseFloat(p.actualProgress)||0;
-  const vari = parseFloat(p.variance)||0;
-
-  document.getElementById('detailInfoGrid').innerHTML = [
-    { l:'Unit',            v: p.unit||'—' },
-    { l:'Area',            v: p.area||'—' },
-    { l:'Equipment',       v: p.equipment||'—' },
-    { l:'Plan Start',      v: fmtDate(p.planStart) },
-    { l:'Plan End',        v: fmtDate(p.planEnd) },
-    { l:'Week Plan',       v: (p.weekPlan||0) + ' minggu' },
-    { l:'Actual Start',    v: fmtDate(p.actualStart)||'—' },
-    { l:'Actual End',      v: fmtDate(p.actualEnd)||'—' },
-    { l:'Week Actual',     v: (p.weekActual||0) + ' minggu' },
-    { l:'Rencana Hari Ini',v: plan.toFixed(2) + '%' },
-    { l:'Aktual Progress', v: act.toFixed(2) + '%' },
-    { l:'Variance',        v: (vari >= 0 ? '+' : '') + vari.toFixed(2) + '%' },
-    { l:'Status',          v: p.status||'—' },
-    { l:'Total Value',     v: (p.totalValue||100) + '%' },
-    { l:'Last Update',     v: fmtDate(p.lastUpdate)||'—' },
-    { l:'Remarks',         v: p.remarks||'—' },
-  ].map(i => `<div class="info-item">
-    <div class="info-item-label">${i.l}</div>
-    <div class="info-item-value">${esc(String(i.v))}</div>
-  </div>`).join('');
-
-  // KPIs — FIX: variance===0 → v-zero
-  document.getElementById('kpiPlan').textContent   = plan.toFixed(1) + '%';
-  document.getElementById('kpiActual').textContent = act.toFixed(1) + '%';
-  const kv = document.getElementById('kpiVariance');
-  kv.textContent = (vari >= 0 ? '+' : '') + vari.toFixed(1) + '%';
-  kv.className = 'kpi-value ' + (vari > 0 ? 'v-pos' : vari === 0 ? 'v-zero' : vari >= -5 ? 'v-warn' : 'v-neg');
-
-  buildSCurve(p, hist || []);
-  renderDetailWdTable();
-  renderHistoryTable(hist || []);
-  fillProgressWdSelect(wds || []);
-
-  // Reset tabs
-  document.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  document.querySelector('.detail-tab[data-tab="tabOverview"]').classList.add('active');
-  document.getElementById('tabOverview').classList.add('active');
-}
-
-// ── S-Curve ──
-function buildSCurve(p, history) {
-  // FIX: destroy old chart properly, then re-create fresh canvas context
-  if(scurveInstance) { scurveInstance.destroy(); scurveInstance = null; }
-  const canvas = document.getElementById('scurveChart');
-  if(!p.planStart || !p.planEnd) return;
-
-  const ps    = new Date(p.planStart + 'T00:00:00');
-  const pe    = new Date(p.planEnd   + 'T00:00:00');
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-
-  // Weekly label points
-  const labels = [], planData = [], labelDates = [];
-  const cur = new Date(ps);
-  while(cur <= pe) {
-    labels.push(cur.toLocaleDateString('id-ID', { month:'short', day:'numeric' }));
-    const pct = cur <= ps ? 0 : cur >= pe ? 100 : (cur - ps) / (pe - ps) * 100;
-    planData.push(Math.round(pct * 100) / 100);
-    labelDates.push(new Date(cur));
-    cur.setDate(cur.getDate() + 7);
-  }
-  // Ensure plan-end is included
-  if(!labelDates.length || labelDates[labelDates.length-1] < pe) {
-    labels.push(pe.toLocaleDateString('id-ID', { month:'short', day:'numeric' }));
-    planData.push(100);
-    labelDates.push(new Date(pe));
-  }
-
-  // Build actual data
-  const actualData = Array(labels.length).fill(null);
-  if(history.length) actualData[0] = 0;  // anchor origin
-
-  // Aggregate: for each history date, find max cumulative across all WDs
-  const maxByDate = {};
-  history.forEach(h => {
-    if(!h.updateDate) return;
-    const c = parseFloat(h.cumulativeProgress)||0;
-    if(maxByDate[h.updateDate] === undefined || c > maxByDate[h.updateDate])
-      maxByDate[h.updateDate] = c;
-  });
-
-  // Place history values at nearest weekly index
-  Object.entries(maxByDate).sort(([a],[b]) => a.localeCompare(b)).forEach(([d, c]) => {
-    const dDate = new Date(d + 'T00:00:00');
-    let minDiff = Infinity, idx = 0;
-    labelDates.forEach((ld, i) => {
-      const diff = Math.abs(ld - dDate);
-      if(diff < minDiff) { minDiff = diff; idx = i; }
-    });
-    if(actualData[idx] === null || c > actualData[idx]) actualData[idx] = c;
-  });
-
-  // Forward-fill up to today
-  let last = null;
-  for(let i = 0; i < actualData.length; i++) {
-    if(actualData[i] !== null) { last = actualData[i]; }
-    else if(last !== null && labelDates[i] <= today) { actualData[i] = last; }
-  }
-
-  // Today marker index
-  let todayIdx = labelDates.findIndex(d => d >= today);
-  if(todayIdx < 0) todayIdx = labelDates.length - 1;
-
-  scurveInstance = new Chart(canvas, {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [
-        {
-          label: 'Rencana (%)',
-          data: planData,
-          borderColor: '#3b82f6',
-          backgroundColor: 'rgba(59,130,246,0.07)',
-          borderWidth: 2, pointRadius: 0, tension: 0.35, fill: true,
-        },
-        {
-          label: 'Aktual (%)',
-          data: actualData,
-          borderColor: '#f5a623',
-          backgroundColor: 'rgba(245,166,35,0.07)',
-          borderWidth: 2.5, pointRadius: 3,
-          pointBackgroundColor: '#f5a623',
-          tension: 0.3, fill: false, spanGaps: true,
-        }
-      ]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      interaction: { mode: 'index', intersect: false },
-      plugins: {
-        legend: { labels: { color: '#8892a4', font: { family: 'DM Mono', size: 11 }, boxWidth: 14 } },
-        tooltip: {
-          backgroundColor: '#1a1e29', borderColor: '#252b3b', borderWidth: 1,
-          titleColor: '#e8ecf5', bodyColor: '#8892a4',
-          callbacks: { label: c => ` ${c.dataset.label}: ${c.parsed.y !== null ? c.parsed.y.toFixed(1)+'%' : '—'}` }
-        },
-        // FIX: do NOT include 'annotation' key — plugin not loaded
-        todayLine: {}   // our registered plugin
-      },
-      scales: {
-        x: { ticks: { color:'#4a5568', font:{ family:'DM Mono', size:10 }, maxTicksLimit:12 }, grid:{ color:'rgba(37,43,59,0.7)' } },
-        y: { min:0, max:100, ticks:{ color:'#4a5568', font:{ family:'DM Mono', size:10 }, callback: v => v+'%' }, grid:{ color:'rgba(37,43,59,0.7)' } }
-      }
-    }
-  });
-  // Pass today index to plugin via chart property
-  scurveInstance.__todayIdx = todayIdx;
-}
-
-// ── Work Details table (detail modal) ──
-function renderDetailWdTable() {
-  const tbody = document.getElementById('detailWdBody');
-  if(!detailWds.length) {
-    tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;padding:24px;color:var(--text-muted)">Belum ada work detail.</td></tr>`;
-    return;
-  }
-  tbody.innerHTML = detailWds.map((wd, i) => `
-    <tr>
-      <td style="color:var(--text-muted);font-family:var(--font-mono);font-size:11px">${i+1}</td>
-      <td><input value="${esc(wd.workDetailName||'')}" oninput="updateDWd(${i},'workDetailName',this.value)"/></td>
-      <td><input value="${esc(wd.pic||'')}"            oninput="updateDWd(${i},'pic',this.value)"/></td>
-      <td><input type="date" value="${wd.planStart||''}"   oninput="updateDWd(${i},'planStart',this.value)"/></td>
-      <td><input type="date" value="${wd.planEnd||''}"     oninput="updateDWd(${i},'planEnd',this.value)"/></td>
-      <td><input type="date" value="${wd.actualStart||''}" oninput="updateDWd(${i},'actualStart',this.value)"/></td>
-      <td><input type="date" value="${wd.actualEnd||''}"   oninput="updateDWd(${i},'actualEnd',this.value)"/></td>
-      <td><input type="number" min="0" max="100" step="0.01" value="${wd.weight||0}"   style="width:65px" oninput="updateDWd(${i},'weight',this.value)"/></td>
-      <td><input type="number" min="0" max="100" step="0.01" value="${wd.progress||0}" style="width:65px" oninput="updateDWd(${i},'progress',this.value)"/></td>
-      <td>
-        <select oninput="updateDWd(${i},'status',this.value)">
-          ${['Not Started','In Progress','On Track','Warning','Delayed','Completed']
-            .map(s => `<option value="${s}" ${wd.status===s?'selected':''}>${s}</option>`).join('')}
-        </select>
-      </td>
-      <td><input value="${esc(wd.notes||'')}" oninput="updateDWd(${i},'notes',this.value)"/></td>
-      <td><button class="btn-del-wd" onclick="deleteDWd(${i})">✕</button></td>
-    </tr>`).join('');
-}
-
-function updateDWd(i, f, v) { if(detailWds[i]) detailWds[i][f] = v; }
-
-function addDetailWdRow() {
-  detailWds.push({
-    workDetailId:'', projectId: currentDetail?.project?.projectId||'',
-    workDetailName:'', pic:'', planStart:'', planEnd:'',
-    actualStart:'', actualEnd:'', weight:0, progress:0, status:'Not Started', notes:''
-  });
-  renderDetailWdTable();
-}
-
-function deleteDWd(i) { detailWds.splice(i, 1); renderDetailWdTable(); }
-
-async function saveWorkDetails() {
-  if(!currentDetail) return;
-  showLoading('Menyimpan work details...');
-  try {
-    const r = await apiPost('updateProject', {
-      projectId:   currentDetail.project.projectId,
-      workDetails: detailWds
-    });
-    if(r.success) {
-      showToast('Work details disimpan!', 'success');
-      await refreshDetail();
-      await loadProjects();
-    } else { showToast('Error: ' + (r.error||''), 'error'); }
-  } catch(e) { showToast('Error: ' + e.message, 'error'); }
-  finally { hideLoading(); }
-}
-
-async function refreshDetail() {
-  const r = await apiGet('getProjectDetail', { projectId: currentDetail.project.projectId });
-  if(!r.success) return;
-  currentDetail = r.data;
-  detailWds     = JSON.parse(JSON.stringify(r.data.workDetails||[]));
-  const p  = r.data.project;
-  const pl = parseFloat(p.plannedProgressToday)||0;
-  const ac = parseFloat(p.actualProgress)||0;
-  const va = parseFloat(p.variance)||0;
-  document.getElementById('kpiPlan').textContent   = pl.toFixed(1)+'%';
-  document.getElementById('kpiActual').textContent = ac.toFixed(1)+'%';
-  const kv = document.getElementById('kpiVariance');
-  kv.textContent = (va>=0?'+':'')+va.toFixed(1)+'%';
-  kv.className = 'kpi-value '+(va>0?'v-pos':va===0?'v-zero':va>=-5?'v-warn':'v-neg');
-  buildSCurve(p, r.data.history||[]);
-  renderHistoryTable(r.data.history||[]);
-  fillProgressWdSelect(r.data.workDetails||[]);
-}
-
-// ── Progress history ──
-function fillProgressWdSelect(wds) {
-  const sel = document.getElementById('phWd');
-  sel.innerHTML = '<option value="">Pilih Work Detail</option>';
-  wds.forEach(wd => {
-    const o = document.createElement('option');
-    o.value = wd.workDetailId;
-    o.textContent = (wd.workDetailName||wd.workDetailId) + ' [' + wd.workDetailId + ']';
-    sel.appendChild(o);
-  });
-}
-
-function renderHistoryTable(history) {
-  const tbody = document.getElementById('historyBody');
-  if(!history.length) {
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-muted)">Belum ada progress history.</td></tr>`;
-    return;
-  }
-  tbody.innerHTML = [...history].reverse().map(h => `
-    <tr>
-      <td style="color:var(--text-muted)">${esc(h.historyId||'')}</td>
-      <td>${esc(h.workDetailId||'')}</td>
-      <td>${h.weekNumber||'—'}</td>
-      <td>${fmtDate(h.updateDate)}</td>
-      <td style="color:var(--accent)">${parseFloat(h.progressInput||0).toFixed(2)}%</td>
-      <td style="color:var(--success)">${parseFloat(h.cumulativeProgress||0).toFixed(2)}%</td>
-      <td style="color:var(--text-muted)">${esc(h.notes||'')}</td>
-    </tr>`).join('');
-}
-
-async function submitProgress() {
-  const wdId  = document.getElementById('phWd').value;
-  const week  = document.getElementById('phWeek').value;
-  const date  = document.getElementById('phDate').value;
-  const prog  = document.getElementById('phProgress').value;
-  const notes = document.getElementById('phNotes').value;
-
-  if(!wdId)    { showToast('Pilih Work Detail', 'error'); return; }
-  if(!date)    { showToast('Pilih tanggal update', 'error'); return; }
-  if(prog==='')  { showToast('Masukkan nilai progress (%)', 'error'); return; }
-  if(parseFloat(prog) < 0 || parseFloat(prog) > 100) { showToast('Progress harus 0–100', 'error'); return; }
-
-  showLoading('Menyimpan progress...');
-  try {
-    const r = await apiPost('addProgressHistory', {
-      projectId: currentDetail.project.projectId,
-      workDetailId: wdId, weekNumber: week,
-      updateDate: date, progressInput: prog, notes
-    });
-    if(r.success) {
-      showToast('Progress berhasil disimpan!', 'success');
-      document.getElementById('phProgress').value = '';
-      document.getElementById('phNotes').value    = '';
-      await refreshDetail();
-      await loadProjects();
-    } else { showToast('Error: ' + (r.error||''), 'error'); }
-  } catch(e) { showToast('Error: ' + e.message, 'error'); }
-  finally { hideLoading(); }
-}
-
-// ============================================================
-// CREATE / EDIT PROJECT
-// ============================================================
-function openNewProjectModal() {
-  document.getElementById('projectFormTitle').textContent = 'Create New Project';
-  document.getElementById('saveProjectBtn').textContent   = 'Buat Project';
-  document.getElementById('editProjectId').value = '';
-  clearForm();
-  wdCounter = 0;
-  document.getElementById('wdRows').innerHTML = '';
-  addWdRow();
-  openModal('projectFormModal');
-}
-
-async function openEditModal(encodedId) {
-  const pid = decodeURIComponent(encodedId);
-  showLoading('Memuat data project...');
-  try {
-    const r = await apiGet('getProjectDetail', { projectId: pid });
-    if(r.success) {
-      const { project: p, workDetails: wds } = r.data;
-      document.getElementById('projectFormTitle').textContent = 'Edit Project';
-      document.getElementById('saveProjectBtn').textContent   = 'Simpan Perubahan';
-      document.getElementById('editProjectId').value  = p.projectId;
-      document.getElementById('fProjectName').value   = p.projectName || '';
-      document.getElementById('fUnit').value          = p.unit        || '';
-      document.getElementById('fArea').value          = p.area        || '';
-      document.getElementById('fEquipment').value     = p.equipment   || '';
-      document.getElementById('fTotalValue').value    = p.totalValue  || 100;
-      document.getElementById('fPlanStart').value     = p.planStart   || '';
-      document.getElementById('fPlanEnd').value       = p.planEnd     || '';
-      document.getElementById('fActualStart').value   = p.actualStart || '';
-      document.getElementById('fActualEnd').value     = p.actualEnd   || '';
-      document.getElementById('fRemarks').value       = p.remarks     || '';
-      wdCounter = 0;
-      document.getElementById('wdRows').innerHTML = '';
-      if(wds && wds.length) { wds.forEach(wd => addWdRow(wd)); }
-      else { addWdRow(); }
-      openModal('projectFormModal');
-    } else { showToast('Error: ' + (r.error||''), 'error'); }
-  } catch(e) { showToast('Error: ' + e.message, 'error'); }
-  finally { hideLoading(); }
-}
-
-function clearForm() {
-  ['fProjectName','fUnit','fArea','fEquipment','fPlanStart','fPlanEnd','fActualStart','fActualEnd','fRemarks']
-    .forEach(id => document.getElementById(id).value = '');
-  document.getElementById('fTotalValue').value = 100;
-}
-
-function addWdRow(data = {}) {
-  wdCounter++;
-  const rowId = 'wdr_' + wdCounter;
-  const div   = document.createElement('div');
-  div.className = 'wd-row'; div.id = rowId;
-  div.innerHTML = `
-    <div class="wd-row-header">
-      <span class="wd-row-num">WORK DETAIL #${wdCounter}</span>
-      <button class="btn-del-wd" onclick="removeWdRow('${rowId}')">✕ Hapus</button>
-    </div>
-    <div class="form-grid-3">
-      <div class="form-group full">
-        <label class="form-label">Nama Work Detail</label>
-        <input type="text" class="form-input wd-name" placeholder="e.g. Pekerjaan Sipil Fondasi" value="${esc(data.workDetailName||'')}"/>
-      </div>
-      <div class="form-group">
-        <label class="form-label">PIC</label>
-        <input type="text" class="form-input wd-pic" placeholder="e.g. John Doe" value="${esc(data.pic||'')}"/>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Plan Start</label>
-        <input type="date" class="form-input wd-planstart" value="${data.planStart||''}"/>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Plan End</label>
-        <input type="date" class="form-input wd-planend" value="${data.planEnd||''}"/>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Weight (%)</label>
-        <input type="number" class="form-input wd-weight" min="0" max="100" step="0.01" value="${data.weight||''}"/>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Notes</label>
-        <input type="text" class="form-input wd-notes" placeholder="Opsional..." value="${esc(data.notes||'')}"/>
-      </div>
-    </div>`;
-  document.getElementById('wdRows').appendChild(div);
-}
-
-function removeWdRow(id) { const el = document.getElementById(id); if(el) el.remove(); }
-
-async function saveProject() {
-  const editId = document.getElementById('editProjectId').value;
-  const name   = document.getElementById('fProjectName').value.trim();
-  const unit   = document.getElementById('fUnit').value.trim().toUpperCase();
-  const area   = document.getElementById('fArea').value.trim().toUpperCase();
-  const equip  = document.getElementById('fEquipment').value.trim().toUpperCase();
-  const tv     = document.getElementById('fTotalValue').value || '100';
-  const ps     = document.getElementById('fPlanStart').value;
-  const pe     = document.getElementById('fPlanEnd').value;
-  const as_    = document.getElementById('fActualStart').value;
-  const ae     = document.getElementById('fActualEnd').value;
-  const rem    = document.getElementById('fRemarks').value.trim();
-
-  if(!name||!unit||!area||!equip||!ps||!pe) { showToast('Isi semua field wajib (*)', 'error'); return; }
-  if(new Date(pe) < new Date(ps))            { showToast('Plan End harus setelah Plan Start', 'error'); return; }
-
-  const workDetails = [];
-  document.getElementById('wdRows').querySelectorAll('.wd-row').forEach(row => {
-    const nm = row.querySelector('.wd-name')?.value?.trim();
-    if(!nm) return;
-    workDetails.push({
-      name:      nm,
-      pic:       row.querySelector('.wd-pic')?.value?.trim()      || '',
-      planStart: row.querySelector('.wd-planstart')?.value        || '',
-      planEnd:   row.querySelector('.wd-planend')?.value          || '',
-      weight:    parseFloat(row.querySelector('.wd-weight')?.value)||0,
-      notes:     row.querySelector('.wd-notes')?.value?.trim()    || ''
-    });
-  });
-
-  showLoading(editId ? 'Memperbarui project...' : 'Membuat project...');
-  try {
-    const payload = { projectName:name, unit, area, equipment:equip, totalValue:tv, planStart:ps, planEnd:pe, actualStart:as_, actualEnd:ae, remarks:rem, workDetails };
-    const r = editId
-      ? await apiPost('updateProject', { projectId: editId, ...payload })
-      : await apiPost('createProject', payload);
-    if(r.success) {
-      showToast(editId ? 'Project diperbarui!' : 'Project dibuat!', 'success');
-      closeModal('projectFormModal');
-      await loadProjects();
-    } else { showToast('Error: ' + (r.error||''), 'error'); }
-  } catch(e) { showToast('Error: ' + e.message, 'error'); }
-  finally { hideLoading(); }
-}
-
-// ============================================================
-// DELETE
-// ============================================================
-function confirmDeleteProject() {
-  if(!currentDetail) return;
-  const { projectId, projectName } = currentDetail.project;
-  document.getElementById('confirmText').textContent =
-    `Hapus "${projectName}"? Semua work detail dan progress history akan dihapus permanen.`;
-  document.getElementById('confirmDeleteBtn').onclick = async () => {
-    closeModal('confirmModal');
-    showLoading('Menghapus project...');
+async function pullFromSheets() {
+    setSyncStatus('syncing', 'Memuat data dari Google Sheets...');
     try {
-      const r = await apiPost('deleteProject', { projectId });
-      if(r.success) {
-        showToast('Project dihapus', 'success');
-        closeModal('projectDetailModal');
-        await loadProjects();
-      } else { showToast('Error: ' + (r.error||''), 'error'); }
-    } catch(e) { showToast('Error: ' + e.message, 'error'); }
-    finally { hideLoading(); }
-  };
-  openModal('confirmModal');
+        const data = await gasGet({ action: "getAllProjects" });
+        if (data && data.success) {
+            projects = data.projects;
+            projects.forEach(p => syncProjectMetrics(p));
+            setSyncStatus('synced', 'Data berhasil dimuat dari Google Sheets');
+            setLastSync();
+            markUnsaved(false);
+        } else {
+            projects = [];
+            setSyncStatus('error', 'Gagal memuat data: ' + (data ? data.error : 'No response'));
+        }
+    } catch (err) {
+        console.error("Pull error:", err);
+        projects = [];
+        setSyncStatus('error', 'Gagal terhubung ke Sheets');
+    }
+    hideLoading();
+    renderDashboard();
 }
 
 // ============================================================
-// TABS
+//  PUSH: Submit satu project ke Sheets (dari tombol Submit di modal)
 // ============================================================
-function switchTab(el) {
-  const tabId = el.dataset.tab;
-  document.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById(tabId).classList.add('active');
-  // FIX: resize chart after switching back to Overview tab (avoids clipped render)
-  if(tabId === 'tabOverview' && scurveInstance) {
-    setTimeout(() => scurveInstance.resize(), 50);
-  }
+async function submitCurrentProjectToSheets() {
+    const p = projects.find(proj => proj.id === activeDetailProjectId);
+    if (!p) return;
+
+    const btn = document.getElementById('btn-submit-detail');
+    btn.disabled = true;
+    btn.textContent = '⏳ Menyimpan...';
+
+    setSyncStatus('syncing', `Menyimpan ${p.id} ke Sheets...`);
+    try {
+        const res = await gasPost({
+            action: "submitProject",
+            project: p,
+            updatedBy: getCurrentUser()
+        });
+        if (res && res.success) {
+            setSyncStatus('synced', `${p.id} berhasil disimpan`);
+            setLastSync();
+            markUnsaved(false);
+            btn.textContent = '✔ Tersimpan';
+            setTimeout(() => { btn.textContent = '☁ Submit to Sheets'; btn.disabled = false; }, 2000);
+        } else {
+            throw new Error(res ? res.error : "No response");
+        }
+    } catch (err) {
+        setSyncStatus('error', 'Gagal menyimpan: ' + err.message);
+        btn.textContent = '☁ Submit to Sheets';
+        btn.disabled = false;
+    }
 }
 
 // ============================================================
-// MODAL HELPERS
+//  PUSH ALL: Push semua project ke Sheets
 // ============================================================
-function openModal(id) {
-  document.getElementById(id).classList.add('open');
-  document.body.style.overflow = 'hidden';
+async function pushAllToSheets() {
+    const btn = document.getElementById('btn-push-sheets');
+    btn.disabled = true;
+    btn.textContent = '⏳ Push semua...';
+    setSyncStatus('syncing', 'Menyinkronkan semua data...');
+    try {
+        const res = await gasPost({
+            action: "bulkSyncProjects",
+            projects,
+            updatedBy: getCurrentUser()
+        });
+        if (res && res.success) {
+            setSyncStatus('synced', `${res.synced} project berhasil disimpan ke Sheets`);
+            setLastSync();
+            markUnsaved(false);
+        } else {
+            throw new Error(res ? res.error : "No response");
+        }
+    } catch (err) {
+        setSyncStatus('error', 'Gagal push: ' + err.message);
+    }
+    btn.textContent = '☁ Push to Sheets';
+    btn.disabled = false;
 }
+
+// ============================================================
+//  UPDATE SCOPE DESCRIPTION / STATUS UPDATE TO SHEETS
+// ============================================================
+async function updateProjectScopeDescription() {
+    const p = projects.find(proj => proj.id === activeDetailProjectId);
+    if (!p) return;
+
+    const textarea = document.getElementById('det-desc');
+    const btn = document.getElementById('btn-update-scope');
+    
+    p.detail = textarea.value; // simpan perubahan ke local state
+    
+    btn.disabled = true;
+    btn.textContent = '⏳ Mengupdate...';
+    setSyncStatus('syncing', `Mengupdate deskripsi status ${p.id}...`);
+
+    try {
+        // Otomatis melakukan submit data terbaru ke Google Sheets via API
+        const res = await gasPost({
+            action: "submitProject",
+            project: p,
+            updatedBy: getCurrentUser()
+        });
+        if (res && res.success) {
+            setSyncStatus('synced', `Deskripsi status ${p.id} berhasil diupdate`);
+            setLastSync();
+            markUnsaved(false);
+            btn.textContent = '✔ Berhasil';
+        } else {
+            throw new Error(res ? res.error : "Gagal response");
+        }
+    } catch (err) {
+        setSyncStatus('error', 'Gagal mengupdate scope: ' + err.message);
+        markUnsaved(true);
+    } finally {
+        setTimeout(() => {
+            btn.disabled = false;
+            btn.textContent = 'Update Status Pekerjaan';
+        }, 2000);
+        renderDashboard();
+    }
+}
+
+// ============================================================
+//  MILESTONE SLIDER: Kirim perubahan ke Sheets setelah berhenti geser
+// ============================================================
+function handleMilestoneSliderSend(projectId, mIdx, milestoneName, oldVal, newVal) {
+    const key = `${projectId}_${mIdx}`;
+    clearTimeout(sliderDebounceTimers[key]);
+
+    sliderDebounceTimers[key] = setTimeout(async () => {
+        if (!SCRIPT_URL || SCRIPT_URL === "YOUR_GAS_WEB_APP_URL_HERE") return;
+        setSyncStatus('syncing', `Merekam perubahan milestone ${milestoneName}...`);
+        try {
+            const res = await gasPost({
+                action: "updateMilestone",
+                projectId,
+                milestoneIndex: mIdx,
+                milestoneName,
+                oldProgress: oldVal,
+                newProgress: newVal,
+                updatedBy: getCurrentUser()
+            });
+            if (res && res.success) {
+                setSyncStatus('synced', `Milestone "${milestoneName}" terekam`);
+                setLastSync();
+                markUnsaved(false);
+            }
+        } catch(err) {
+            setSyncStatus('error', 'Gagal merekam milestone: ' + err.message);
+            markUnsaved(true);
+        }
+    }, 800); // debounce 800ms setelah slider berhenti
+}
+
+// ============================================================
+//  USER IDENTIFIER (simple — bisa diganti SSO)
+// ============================================================
+function getCurrentUser() {
+    let u = sessionStorage.getItem('prasad_user');
+    if (!u) {
+        u = prompt("Masukkan nama Anda untuk identifikasi perubahan:", "") || "Anonymous";
+        sessionStorage.setItem('prasad_user', u);
+    }
+    return u;
+}
+
+// ============================================================
+//  LOADING OVERLAY
+// ============================================================
+function hideLoading() {
+    document.getElementById('loading-overlay').classList.add('hidden');
+}
+
+// ============================================================
+//  CORE LOGIC
+// ============================================================
+function calculateActualPct(project) {
+    if (!project.milestones || project.milestones.length === 0) return 0;
+    let sum = project.milestones.reduce((acc, m) => acc + parseInt(m.progress || 0), 0);
+    return Math.round(sum / project.milestones.length);
+}
+
+function deriveStatus(actualPct) {
+    if (actualPct === 0) return "OPEN";
+    if (actualPct === 100) return "CLOSED";
+    return "ON PROGRESS";
+}
+
+function syncProjectMetrics(project) {
+    project.actualPct = calculateActualPct(project);
+    project.status = deriveStatus(project.actualPct);
+}
+
+// ============================================================
+//  DROPDOWN CASCADING
+// ============================================================
+function populateAreaDropdown(unitElementValue, targetSelectId) {
+    const selectArea = document.getElementById(targetSelectId);
+    selectArea.innerHTML = '';
+    if (targetSelectId === 'filter-area') {
+        const opt = document.createElement('option');
+        opt.value = ""; opt.textContent = "ALL AREAS";
+        selectArea.appendChild(opt);
+    }
+    const areas = UNIT_AREAS[unitElementValue] || [];
+    areas.forEach(a => {
+        const opt = document.createElement('option');
+        opt.value = a; opt.textContent = a.toUpperCase();
+        selectArea.appendChild(opt);
+    });
+}
+
+function handleModalUnitChange(unitId, areaId) {
+    populateAreaDropdown(document.getElementById(unitId).value, areaId);
+}
+
+// ============================================================
+//  INITIALIZATION
+// ============================================================
+window.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('filter-unit').addEventListener('change', (e) => {
+        populateAreaDropdown(e.target.value, 'filter-area');
+    });
+    populateAreaDropdown("UNIT 1", "p-area");
+    initCharts();
+    // Auto pull dari Sheets saat halaman dibuka
+    pullFromSheets();
+});
+
+// ============================================================
+//  FILTER
+// ============================================================
+function getFilteredData() {
+    const fUnit   = document.getElementById('filter-unit').value;
+    const fArea   = document.getElementById('filter-area').value;
+    const fMonth  = document.getElementById('filter-month').value;
+    const fStatus = document.getElementById('filter-status').value;
+    return projects.filter(p => {
+        if (fUnit   && p.unit !== fUnit)    return false;
+        if (fArea   && p.area !== fArea)    return false;
+        if (fStatus && p.status !== fStatus) return false;
+        if (fMonth) { if (p.startDate.split('-')[1] !== fMonth) return false; }
+        return true;
+    });
+}
+
+function handleFilterChange() { renderDashboard(); }
+
+function resetFilters() {
+    document.getElementById('filter-unit').value = "";
+    document.getElementById('filter-area').innerHTML = '<option value="">ALL AREAS</option>';
+    document.getElementById('filter-month').value = "";
+    document.getElementById('filter-status').value = "";
+    renderDashboard();
+}
+
+// ============================================================
+//  RENDER DASHBOARD
+// ============================================================
+function renderDashboard() {
+    const filteredData = getFilteredData();
+    const open     = filteredData.filter(p => p.status === 'OPEN').length;
+    const progress = filteredData.filter(p => p.status === 'ON PROGRESS').length;
+    const closed   = filteredData.filter(p => p.status === 'CLOSED').length;
+
+    document.getElementById('kpi-total-val').textContent    = filteredData.length;
+    document.getElementById('kpi-open-val').textContent     = open;
+    document.getElementById('kpi-progress-val').textContent = progress;
+    document.getElementById('kpi-closed-val').textContent   = closed;
+    document.getElementById('filtered-count').textContent   = `Showing ${filteredData.length} of ${projects.length} Entries`;
+
+    const tbody = document.getElementById('project-table-body');
+    tbody.innerHTML = '';
+
+    if (filteredData.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:40px;">No matching project data found.</td></tr>`;
+    } else {
+        filteredData.forEach(p => {
+            let badgeClass = p.status === 'OPEN' ? 'badge-open' : (p.status === 'CLOSED' ? 'badge-closed' : 'badge-progress');
+            let barColor   = p.status === 'OPEN' ? 'var(--status-open)' : (p.status === 'CLOSED' ? 'var(--status-closed)' : 'var(--status-progress)');
+            const tr = document.createElement('tr');
+            tr.setAttribute('onclick', `openProjectDetail('${p.id}')`);
+            tr.innerHTML = `
+                <td style="font-weight:600; color:#fff;">${p.name}</td>
+                <td><span style="font-size:12px; display:block; font-weight:bold;">${p.unit}</span><span style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">${p.area}</span></td>
+                <td>${p.pic}</td>
+                <td style="font-weight:bold; color:var(--text-muted);">${p.planPct}%</td>
+                <td><div class="progress-wrapper"><span style="font-weight:bold; font-size:13px; width:35px;">${p.actualPct}%</span><div class="progress-bar-container"><div class="progress-bar-fill" style="width:${p.actualPct}%; background-color:${barColor}"></div></div></div></td>
+                <td><span class="badge ${badgeClass}">${p.status}</span></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+    updateChartsData(filteredData);
+}
+
+// ============================================================
+//  MODAL TOGGLES
+// ============================================================
+function openCreateModal() {
+    document.getElementById('form-create-project').reset();
+    handleModalUnitChange('p-unit', 'p-area');
+    document.getElementById('modal-create').classList.add('active');
+}
+
 function closeModal(id) {
-  document.getElementById(id).classList.remove('open');
-  if(!document.querySelector('.modal-backdrop.open')) document.body.style.overflow = '';
-}
-document.querySelectorAll('.modal-backdrop').forEach(b => {
-  b.addEventListener('click', e => { if(e.target === b) closeModal(b.id); });
-});
-document.addEventListener('keydown', e => {
-  if(e.key === 'Escape') {
-    const open = document.querySelector('.modal-backdrop.open');
-    if(open) closeModal(open.id);
-  }
-});
-
-// ============================================================
-// TOAST
-// ============================================================
-function showToast(msg, type = 'info') {
-  const c  = document.getElementById('toastContainer');
-  const el = document.createElement('div');
-  el.className = 'toast ' + type;
-  el.innerHTML = `<span>${{success:'✅',error:'❌',info:'ℹ️'}[type]||'•'}</span><span>${esc(msg)}</span>`;
-  c.appendChild(el);
-  setTimeout(() => {
-    el.style.cssText += 'opacity:0;transform:translateX(20px);transition:all 0.3s';
-    setTimeout(() => el.remove(), 320);
-  }, 4000);
+    document.getElementById(id).classList.remove('active');
+    if (id === 'modal-detail') activeDetailProjectId = null;
 }
 
 // ============================================================
-// LOADING
+//  CREATE PROJECT → langsung push ke Sheets saat submit form
 // ============================================================
-function showLoading(t='Loading...') {
-  document.getElementById('loadingText').textContent = t;
-  document.getElementById('loadingOverlay').classList.remove('hidden');
+async function saveNewProject(e) {
+    e.preventDefault();
+    const name   = document.getElementById('p-name').value;
+    const unit   = document.getElementById('p-unit').value;
+    const area   = document.getElementById('p-area').value;
+    const pic    = document.getElementById('p-pic').value;
+    const start  = document.getElementById('p-start').value;
+    const due    = document.getElementById('p-due').value;
+    const detail = document.getElementById('p-detail').value;
+
+    // Generate ID berdasarkan jumlah project + 1
+    const nextNum = projects.length + 1;
+    const id = 'PRJ-' + String(nextNum).padStart(3, '0');
+
+    const milestones = DEFAULT_MILESTONES.map(mName => ({ name: mName, progress: 0, date: due }));
+    const newProj = { id, name, unit, area, pic, detail, startDate: start, dueDate: due, planPct: 100, milestones };
+    syncProjectMetrics(newProj);
+    projects.push(newProj);
+
+    closeModal('modal-create');
+    renderDashboard();
+    markUnsaved(true);
+
+    // Auto push ke Sheets
+    setSyncStatus('syncing', `Menyimpan project baru ${id}...`);
+    try {
+        const res = await gasPost({ action: "submitProject", project: newProj, updatedBy: getCurrentUser() });
+        if (res && res.success) {
+            setSyncStatus('synced', `Project ${id} berhasil disimpan ke Sheets`);
+            setLastSync();
+            markUnsaved(false);
+        } else if (res) {
+            setSyncStatus('error', 'Tersimpan lokal — gagal ke Sheets: ' + res.error);
+            markUnsaved(true);
+        }
+    } catch(err) {
+        setSyncStatus('error', 'Tersimpan lokal — tidak ada koneksi Sheets');
+        markUnsaved(true);
+    }
 }
-function hideLoading() { document.getElementById('loadingOverlay').classList.add('hidden'); }
 
 // ============================================================
-// UTILS
+//  PROJECT DETAIL MODAL
 // ============================================================
-function fmtDate(d) {
-  if(!d) return '—';
-  try {
-    const s  = String(d);
-    const dt = new Date(s.length === 10 ? s + 'T00:00:00' : s);
-    if(isNaN(dt)) return s;
-    return dt.toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' });
-  } catch { return String(d); }
+function openProjectDetail(id) {
+    const p = projects.find(proj => proj.id === id);
+    if (!p) return;
+    activeDetailProjectId = id;
+
+    // Simpan state awal progress setiap milestone sebelum user edit
+    prevMilestoneProgress = {};
+    p.milestones.forEach((m, idx) => { prevMilestoneProgress[idx] = m.progress; });
+
+    document.getElementById('det-title').textContent   = `${p.id} : ${p.name}`;
+    document.getElementById('det-meta').textContent    = `${p.unit} // AREA: ${p.area.toUpperCase()}`;
+    document.getElementById('det-pic').textContent     = p.pic;
+    document.getElementById('det-timeline').textContent= `${p.startDate} to ${p.dueDate}`;
+    document.getElementById('det-plan-pct').textContent= `${p.planPct}%`;
+    
+    // Taruh deskripsi lama ke area text agar bisa langsung diedit
+    document.getElementById('det-desc').value          = p.detail || "";
+
+    document.getElementById('btn-delete-project').onclick = async () => {
+        if (confirm(`Hapus ${p.id} dari master records?`)) {
+            // Kirim delete ke Sheets dulu
+            setSyncStatus('syncing', `Menghapus ${p.id}...`);
+            try {
+                await gasPost({ action: "deleteProject", projectId: p.id, updatedBy: getCurrentUser() });
+            } catch(e) {}
+            projects = projects.filter(proj => proj.id !== p.id);
+            closeModal('modal-detail');
+            renderDashboard();
+            setSyncStatus('synced', `Project ${p.id} dihapus`);
+            setLastSync();
+        }
+    };
+
+    markUnsaved(false);
+    renderDetailMilestoneInterface(p);
+    document.getElementById('modal-detail').classList.add('active');
 }
 
-function esc(s) {
-  if(s == null) return '';
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-                  .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+function renderDetailMilestoneInterface(p) {
+    document.getElementById('det-actual-pct').textContent = `${p.actualPct}%`;
+    const badge = document.getElementById('det-status-badge');
+    badge.className = `badge ${p.status === 'OPEN' ? 'badge-open' : (p.status === 'CLOSED' ? 'badge-closed' : 'badge-progress')}`;
+    badge.textContent = p.status;
+
+    // Render stepper
+    const stepperBox = document.getElementById('det-stepper');
+    stepperBox.innerHTML = '';
+    p.milestones.forEach((m, idx) => {
+        let stateClass = 'waiting', symbol = idx + 1;
+        if (m.progress === 100) { stateClass = 'complete'; symbol = '✔'; }
+        else if (m.progress > 0) { stateClass = 'active'; symbol = '~'; }
+        const item = document.createElement('div');
+        item.className = 'step-item';
+        item.innerHTML = `<div class="step-icon ${stateClass}">${symbol}</div> <span>${m.name} (${m.progress}%)</span>`;
+        stepperBox.appendChild(item);
+        if (idx < p.milestones.length - 1) {
+            const line = document.createElement('div');
+            line.className = `step-line ${m.progress > 0 ? 'active' : ''}`;
+            stepperBox.appendChild(line);
+        }
+    });
+
+    // Render milestone rows
+    const rowsContainer = document.getElementById('milestone-rows-container');
+    rowsContainer.innerHTML = '';
+    p.milestones.forEach((m, idx) => {
+        const div = document.createElement('div');
+        div.className = 'milestone-row';
+        div.innerHTML = `
+            <div>
+                <input type="text" class="form-control" value="${m.name}" style="padding:5px;"
+                    onchange="updateMilestoneMeta(${idx}, 'name', this.value)">
+            </div>
+            <div>
+                <input type="date" class="form-control" value="${m.date || ''}" style="padding:5px;"
+                    onchange="updateMilestoneMeta(${idx}, 'date', this.value)">
+            </div>
+            <div class="slider-box">
+                <input type="range" min="0" max="100" value="${m.progress}"
+                    oninput="handleMilestoneSliderLive(${idx}, this.value)"
+                    onchange="handleMilestoneSliderCommit(${idx}, this.value)">
+                <span class="slider-val" id="sl-val-${idx}">${m.progress}%</span>
+            </div>
+            <div>
+                <button class="btn btn-danger" style="padding:5px 10px; font-size:12px;"
+                    onclick="deleteMilestoneRow(${idx})">&times;</button>
+            </div>
+        `;
+        rowsContainer.appendChild(div);
+    });
+}
+
+// ============================================================
+//  SLIDER: Live update UI (tidak kirim ke Sheets dulu)
+// ============================================================
+function handleMilestoneSliderLive(mIdx, val) {
+    const p = projects.find(proj => proj.id === activeDetailProjectId);
+    if (!p) return;
+
+    p.milestones[mIdx].progress = parseInt(val);
+    document.getElementById(`sl-val-${mIdx}`).textContent = `${val}%`;
+
+    syncProjectMetrics(p);
+    document.getElementById('det-actual-pct').textContent = `${p.actualPct}%`;
+    const badge = document.getElementById('det-status-badge');
+    badge.className = `badge ${p.status === 'OPEN' ? 'badge-open' : (p.status === 'CLOSED' ? 'badge-closed' : 'badge-progress')}`;
+    badge.textContent = p.status;
+
+    // Update stepper visual
+    const stepperBox = document.getElementById('det-stepper');
+    stepperBox.innerHTML = '';
+    p.milestones.forEach((m, idx) => {
+        let stateClass = 'waiting', symbol = idx + 1;
+        if (m.progress === 100) { stateClass = 'complete'; symbol = '✔'; }
+        else if (m.progress > 0) { stateClass = 'active'; symbol = '~'; }
+        const item = document.createElement('div');
+        item.className = 'step-item';
+        item.innerHTML = `<div class="step-icon ${stateClass}">${symbol}</div> <span>${m.name} (${m.progress}%)</span>`;
+        stepperBox.appendChild(item);
+        if (idx < p.milestones.length - 1) {
+            const line = document.createElement('div');
+            line.className = `step-line ${m.progress > 0 ? 'active' : ''}`;
+            stepperBox.appendChild(line);
+        }
+    });
+
+    markUnsaved(true);
+    renderDashboard();
+}
+
+// ============================================================
+//  SLIDER: Commit ke Sheets dengan debounce (setiap perubahan terekam)
+// ============================================================
+function handleMilestoneSliderCommit(mIdx, val) {
+    const p = projects.find(proj => proj.id === activeDetailProjectId);
+    if (!p) return;
+
+    const newVal = parseInt(val);
+    const oldVal = prevMilestoneProgress[mIdx] !== undefined ? prevMilestoneProgress[mIdx] : newVal;
+
+    // Update prev tracker
+    prevMilestoneProgress[mIdx] = newVal;
+
+    // Kirim ke Sheets via debounce (setiap perubahan terakhir akan terekam di MilestoneHistory)
+    handleMilestoneSliderSend(p.id, mIdx, p.milestones[mIdx].name, oldVal, newVal);
+}
+
+// ============================================================
+//  UPDATE MILESTONE META (nama / tanggal)
+// ============================================================
+function updateMilestoneMeta(mIdx, structuralKey, val) {
+    const p = projects.find(proj => proj.id === activeDetailProjectId);
+    if (!p) return;
+    p.milestones[mIdx][structuralKey] = val;
+    markUnsaved(true);
+    renderDashboard();
+}
+
+// ============================================================
+//  ADD / DELETE MILESTONE
+// ============================================================
+function addNewMilestoneToCurrent() {
+    const p = projects.find(proj => proj.id === activeDetailProjectId);
+    if (!p) return;
+    p.milestones.push({ name: "Custom Step", progress: 0, date: p.dueDate });
+    syncProjectMetrics(p);
+    renderDetailMilestoneInterface(p);
+    markUnsaved(true);
+    renderDashboard();
+}
+
+function deleteMilestoneRow(mIdx) {
+    const p = projects.find(proj => proj.id === activeDetailProjectId);
+    if (!p) return;
+    if (p.milestones.length <= 1) {
+        alert("Minimal project harus memiliki 1 milestone!");
+        return;
+    }
+    p.milestones.splice(mIdx, 1);
+    // Update prevMilestoneProgress
+    const newPrev = {};
+    p.milestones.forEach((m, i) => { newPrev[i] = m.progress; });
+    prevMilestoneProgress = newPrev;
+    syncProjectMetrics(p);
+    renderDetailMilestoneInterface(p);
+    markUnsaved(true);
+    renderDashboard();
+}
+
+// ============================================================
+//  CHARTS
+// ============================================================
+function initCharts() {
+    const configOption = {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { labels: { color: '#a1a1aa', font: { size: 11 } } } },
+        scales: {
+            x: { grid: { color: '#2e2e35' }, ticks: { color: '#a1a1aa', font: { size: 10 } } },
+            y: { grid: { color: '#2e2e35' }, ticks: { color: '#a1a1aa', font: { size: 10 } }, beginAtZero: true, max: 100 }
+        }
+    };
+
+    globalCharts.status = new Chart(document.getElementById('chart-status').getContext('2d'), {
+        type: 'doughnut',
+        data: { labels: ['OPEN','ON PROGRESS','CLOSED'], datasets: [{ data:[0,0,0], backgroundColor:['#ef4444','#f59e0b','#10b981'], borderWidth:0 }] },
+        options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ color:'#a1a1aa', font:{ size:11 } } } } }
+    });
+
+    globalCharts.unit = new Chart(document.getElementById('chart-unit').getContext('2d'), {
+        type: 'bar',
+        data: { labels:['UNIT 1','UNIT 2'], datasets:[{ label:'Total Proyek', data:[0,0], backgroundColor:'#00adb5' }] },
+        options: { ...configOption, scales: { x:{grid:{color:'#2e2e35'},ticks:{color:'#a1a1aa'}}, y:{grid:{color:'#2e2e35'},ticks:{color:'#a1a1aa',stepSize:1},beginAtZero:true} } }
+    });
+
+    globalCharts.progress = new Chart(document.getElementById('chart-progress').getContext('2d'), {
+        type: 'bar',
+        data: { labels:[], datasets:[{ label:'Target Plan %', data:[], backgroundColor:'#3b82f6' }, { label:'Actual Calculated %', data:[], backgroundColor:'#10b981' }] },
+        options: configOption
+    });
+
+    globalCharts.monthly = new Chart(document.getElementById('chart-monthly').getContext('2d'), {
+        type: 'line',
+        data: { labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], datasets:[{ label:'Initiated Count', data:Array(12).fill(0), borderColor:'#00adb5', backgroundColor:'#00adb5', tension:0.2, fill:false }] },
+        options: { ...configOption, scales:{ x:{grid:{color:'#2e2e35'},ticks:{color:'#a1a1aa'}}, y:{grid:{color:'#2e2e35'},ticks:{color:'#a1a1aa',stepSize:1},beginAtZero:true} } }
+    });
+}
+
+function updateChartsData(filteredData) {
+    const open     = filteredData.filter(p => p.status === 'OPEN').length;
+    const progress = filteredData.filter(p => p.status === 'ON PROGRESS').length;
+    const closed   = filteredData.filter(p => p.status === 'CLOSED').length;
+    globalCharts.status.data.datasets[0].data = [open, progress, closed];
+    globalCharts.status.update();
+
+    globalCharts.unit.data.datasets[0].data = [
+        filteredData.filter(p => p.unit === 'UNIT 1').length,
+        filteredData.filter(p => p.unit === 'UNIT 2').length
+    ];
+    globalCharts.unit.update();
+
+    const displayLimit = filteredData.slice(0, 15);
+    globalCharts.progress.data.labels            = displayLimit.map(p => p.id);
+    globalCharts.progress.data.datasets[0].data  = displayLimit.map(p => p.planPct);
+    globalCharts.progress.data.datasets[1].data  = displayLimit.map(p => p.actualPct);
+    globalCharts.progress.update();
+
+    let monthsDistribution = Array(12).fill(0);
+    filteredData.forEach(p => {
+        let mIdx = parseInt(p.startDate.split('-')[1]) - 1;
+        if (mIdx >= 0 && mIdx < 12) monthsDistribution[mIdx]++;
+    });
+    globalCharts.monthly.data.datasets[0].data = monthsDistribution;
+    globalCharts.monthly.update();
+}
+
+// ============================================================
+//  PDF / PRINT
+// ============================================================
+function preparePDFTemplateData() {
+    const filteredData = getFilteredData();
+    document.getElementById('pdf-generated-date').textContent = `Report Timestamp: ${new Date().toLocaleString()}`;
+    const fUnit   = document.getElementById('filter-unit').value   || 'ALL UNITS';
+    const fArea   = document.getElementById('filter-area').value   || 'ALL AREAS';
+    const fStatus = document.getElementById('filter-status').value || 'ALL STATUS';
+    document.getElementById('pdf-active-filters').textContent = `UNIT: ${fUnit} | AREA: ${fArea} | STATUS: ${fStatus}`;
+    document.getElementById('pdf-kpi-total').textContent    = filteredData.length;
+    document.getElementById('pdf-kpi-open').textContent     = filteredData.filter(p => p.status === 'OPEN').length;
+    document.getElementById('pdf-kpi-progress').textContent = filteredData.filter(p => p.status === 'ON PROGRESS').length;
+    document.getElementById('pdf-kpi-closed').textContent   = filteredData.filter(p => p.status === 'CLOSED').length;
+
+    const tableBody = document.getElementById('pdf-table-body');
+    tableBody.innerHTML = '';
+    const detailContainer = document.getElementById('pdf-detailed-blocks');
+    detailContainer.innerHTML = '';
+
+    if (filteredData.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;">No data available.</td></tr>`;
+        return;
+    }
+
+    filteredData.forEach(p => {
+        const tr = document.createElement('tr');
+        const actualPct = p.actualPct || 0;
+        const planPct   = p.planPct   || 0;
+
+        // Tentukan warna bar & status
+        let barColor    = '#ef4444';  // merah = OPEN
+        let statusStyle = 'color:#c0392b; font-weight:bold;';
+        if (p.status === 'CLOSED') {
+            barColor    = '#10b981';
+            statusStyle = 'color:#10b981; font-weight:bold;';
+        } else if (p.status === 'ON PROGRESS') {
+            barColor    = '#f59e0b';
+            statusStyle = 'color:#d97706; font-weight:bold;';
+        }
+
+        // Delta plan vs actual (over/under)
+        const delta      = actualPct - planPct;
+        const deltaLabel = delta >= 0
+            ? `<span style="color:#27ae60; font-size:9px;">▲ +${delta}%</span>`
+            : `<span style="color:#e74c3c; font-size:9px;">▼ ${delta}%</span>`;
+
+        // Bar plan (abu) & bar actual (warna status) — dual-layer bar
+        const planBarInner   = `<div style="position:absolute; top:0; left:0; height:100%; width:${planPct}%; background:#bdc3c7; border-radius:3px; opacity:0.6;"></div>`;
+        const actualBarInner = `<div style="position:absolute; top:0; left:0; height:100%; width:${actualPct}%; background:${barColor}; border-radius:3px;"></div>`;
+        const progressBar    = `
+            <div style="position:relative; background:#ecf0f1; border-radius:3px; height:10px; width:100%; margin-bottom:3px; overflow:hidden;">
+                ${planBarInner}
+                ${actualBarInner}
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:9px; color:#555;">Plan: ${planPct}%</span>
+                <span style="font-size:9px; font-weight:bold; color:#333;">Actual: ${actualPct}%</span>
+                ${deltaLabel}
+            </div>
+        `;
+
+        tr.innerHTML = `
+            <td style="font-weight:bold; color:#111; padding:6px; border:1px solid #ddd; word-wrap:break-word; vertical-align:middle;">${p.name}</td>
+            <td style="text-align:center; padding:6px; border:1px solid #ddd; vertical-align:middle;">${p.unit}</td>
+            <td style="text-align:center; padding:6px; border:1px solid #ddd; vertical-align:middle; word-wrap:break-word;">${p.area.toUpperCase()}</td>
+            <td style="padding:6px; border:1px solid #ddd; vertical-align:middle; word-wrap:break-word;">${p.pic}</td>
+            <td style="text-align:center; font-weight:bold; color:#555; padding:6px; border:1px solid #ddd; vertical-align:middle;">${planPct}%</td>
+            <td style="padding:5px 6px; border:1px solid #ddd; vertical-align:middle;">${progressBar}</td>
+            <td style="text-align:center; padding:6px; border:1px solid #ddd; vertical-align:middle; ${statusStyle}">${p.status}</td>
+        `;
+        tableBody.appendChild(tr);
+
+        const block = document.createElement('div');
+        block.className = 'pdf-project-card';
+        let milestoneSummaryString = p.milestones.map(m => {
+            let marker = m.progress === 100 ? '✔' : m.progress > 0 ? '~' : '○';
+            return `<span style="margin-right:15px; display:inline-block; font-size:11px;"><strong>${marker} ${m.name}</strong> (${m.progress}%) - <span style="color:#555;">Target: ${m.date}</span></span>`;
+        }).join(' ');
+
+        block.innerHTML = `
+            <h4 style="margin:0 0 8px 0; font-size:13px; border-bottom:1px solid #777; padding-bottom:3px;">${p.id} : ${p.name}</h4>
+            <div class="pdf-grid">
+                <div><strong>Unit/Area:</strong> ${p.unit} / ${p.area}</div>
+                <div><strong>PIC:</strong> ${p.pic}</div>
+                <div><strong>Timeline:</strong> ${p.startDate} to ${p.dueDate}</div>
+                <div><strong>Plan/Actual:</strong> ${p.planPct}% / ${p.actualPct}% [${p.status}]</div>
+            </div>
+            <div style="font-size:11px; margin-bottom:10px; background:#f9f9f9; padding:6px; border-left:3px solid #333;">
+                <strong>Scope:</strong> ${p.detail || 'No details logged.'}
+            </div>
+            <div style="background:#f2f2f2; padding:6px; font-size:11px;">
+                <strong>Milestones:</strong><br><div style="margin-top:4px;">${milestoneSummaryString}</div>
+            </div>
+        `;
+        detailContainer.appendChild(block);
+    });
+}
+
+// ============================================================
+//  EXPORT PDF
+// ============================================================
+function exportPDF() {
+    preparePDFTemplateData();
+    openPrintPreviewModal();
+}
+
+const PAPER_SIZES_MM = {
+    a4:     { w: 210, h: 297 },
+    a3:     { w: 297, h: 420 },
+    letter: { w: 216, h: 279 },
+    legal:  { w: 216, h: 356 }
+};
+
+function openPrintPreviewModal() {
+    document.getElementById('modal-print-preview').classList.add('active');
+    updatePrintPreview();
+}
+
+function updatePrintPreview() {
+    const paper   = document.getElementById('pp-paper').value;
+    const orient  = document.querySelector('input[name="pp-orient"]:checked').value;
+    const mt      = parseInt(document.getElementById('pp-mt').value) || 10;
+    const mb      = parseInt(document.getElementById('pp-mb').value) || 10;
+    const ml      = parseInt(document.getElementById('pp-ml').value) || 8;
+    const mr      = parseInt(document.getElementById('pp-mr').value) || 8;
+    const fs      = parseInt(document.getElementById('pp-fontsize').value) || 10;
+    const showMs  = document.getElementById('pp-show-milestone').checked;
+    const showKpi = document.getElementById('pp-show-kpi').checked;
+    const zebra   = document.getElementById('pp-zebra').checked;
+
+    let { w: pw, h: ph } = PAPER_SIZES_MM[paper];
+    if (orient === 'landscape') { let tmp = pw; pw = ph; ph = tmp; }
+
+    document.getElementById('pp-page-info').textContent = `${pw} × ${ph} mm · Margin: ${mt}/${mr}/${mb}/${ml} mm`;
+
+    // Ukuran frame preview
+    const MAX_PREVIEW_W = 560;
+    const ratio    = MAX_PREVIEW_W / pw;
+    const previewW = Math.round(pw * ratio);
+    const previewH = Math.round(ph * ratio);
+
+    const frame = document.getElementById('pp-paper-frame');
+    frame.style.width  = previewW + 'px';
+    frame.style.height = previewH + 'px';
+    frame.style.overflow = 'hidden';
+
+    // Build HTML sekali — ini sumber tunggal untuk preview & PDF
+    window._pdfReadyHtml = buildPDFContentHtml({ fs, showMs, showKpi, zebra, mt, mb, ml, mr });
+
+    // Untuk preview: wrap dalam container full-width lalu scale down
+    const RENDER_W = 900;
+    const scaleRatio = previewW / RENDER_W;
+
+    const previewContainer = document.getElementById('pp-preview-content');
+    previewContainer.style.width          = RENDER_W + 'px';
+    previewContainer.style.transformOrigin = 'top left';
+    previewContainer.style.transform      = `scale(${scaleRatio})`;
+    previewContainer.innerHTML            = window._pdfReadyHtml;
+}
+
+function doPrintWindow() {
+    const content = document.getElementById('pp-preview-content').innerHTML;
+    const paper   = document.getElementById('pp-paper').value;
+    const orient  = document.querySelector('input[name="pp-orient"]:checked').value;
+    const mt = document.getElementById('pp-mt').value;
+    const mb = document.getElementById('pp-mb').value;
+    const ml = document.getElementById('pp-ml').value;
+    const mr = document.getElementById('pp-mr').value;
+    const w = window.open('', '_blank');
+    w.document.write(`<html><head><title>Print - Prasad Seeds</title>
+    <style>
+        @page { size: ${paper} ${orient}; margin: ${mt}mm ${mr}mm ${mb}mm ${ml}mm; }
+        body { margin:0; padding:0; font-family:'Segoe UI',Arial,sans-serif; background:#fff; color:#000; }
+        table { width:100%; border-collapse:collapse; table-layout:fixed; }
+        th,td { border:1px solid #ddd; }
+        @media print { body { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
+    </style></head><body>${content}<script>window.onload=function(){window.print();window.close();}<\/script></body></html>`);
+    w.document.close();
+}
+
+function buildPDFContentHtml({ fs, showMs, showKpi, zebra, mt, mb, ml, mr }) {
+    const filteredData = getFilteredData();
+    const open     = filteredData.filter(p => p.status === 'OPEN').length;
+    const progress = filteredData.filter(p => p.status === 'ON PROGRESS').length;
+    const closed   = filteredData.filter(p => p.status === 'CLOSED').length;
+    const fUnit    = document.getElementById('filter-unit').value   || 'ALL UNITS';
+    const fArea    = document.getElementById('filter-area').value   || 'ALL AREAS';
+    const fStatus  = document.getElementById('filter-status').value || 'ALL STATUS';
+
+    const kpiHtml = showKpi ? `
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;text-align:center;">
+            <div style="border:1px solid #111;padding:8px;">
+                <div style="font-size:${fs-1}px;font-weight:bold;text-transform:uppercase;">Total Projects</div>
+                <div style="font-size:${fs+8}px;font-weight:bold;">${filteredData.length}</div>
+            </div>
+            <div style="border:1px solid #111;padding:8px;">
+                <div style="font-size:${fs-1}px;font-weight:bold;text-transform:uppercase;">Open</div>
+                <div style="font-size:${fs+8}px;font-weight:bold;color:#c0392b;">${open}</div>
+            </div>
+            <div style="border:1px solid #111;padding:8px;">
+                <div style="font-size:${fs-1}px;font-weight:bold;text-transform:uppercase;">On Progress</div>
+                <div style="font-size:${fs+8}px;font-weight:bold;color:#d97706;">${progress}</div>
+            </div>
+            <div style="border:1px solid #111;padding:8px;">
+                <div style="font-size:${fs-1}px;font-weight:bold;text-transform:uppercase;">Closed</div>
+                <div style="font-size:${fs+8}px;font-weight:bold;color:#16a34a;">${closed}</div>
+            </div>
+        </div>` : '';
+
+    let rowsHtml = '';
+    filteredData.forEach((p, i) => {
+        const bgRow = zebra && i % 2 === 1 ? '#f5f5f5' : '#ffffff';
+        let barColor = '#ef4444', statusColor = '#c0392b';
+        if (p.status === 'CLOSED')           { barColor = '#10b981'; statusColor = '#16a34a'; }
+        else if (p.status === 'ON PROGRESS') { barColor = '#f59e0b'; statusColor = '#d97706'; }
+
+        const actualPct = p.actualPct || 0;
+        const planPct   = p.planPct   || 0;
+        const delta     = actualPct - planPct;
+        const deltaHtml = delta >= 0
+            ? `<span style="color:#27ae60;font-size:${fs-1}px;">▲+${delta}%</span>`
+            : `<span style="color:#e74c3c;font-size:${fs-1}px;">▼${delta}%</span>`;
+
+        const barHtml = `
+            <div style="position:relative;background:#e5e7eb;border-radius:2px;height:9px;overflow:hidden;margin-bottom:3px;">
+                <div style="position:absolute;top:0;left:0;height:100%;width:${planPct}%;background:#9ca3af;border-radius:2px;"></div>
+                <div style="position:absolute;top:0;left:0;height:100%;width:${actualPct}%;background:${barColor};border-radius:2px;"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:${fs-1}px;color:#444;">
+                <span>Plan: ${planPct}%</span>
+                <span style="font-weight:bold;">Actual: ${actualPct}%</span>
+                ${deltaHtml}
+            </div>`;
+
+        rowsHtml += `<tr style="background:${bgRow};">
+            <td style="padding:5px 6px;border:1px solid #ddd;font-weight:bold;font-size:${fs}px;word-break:break-word;vertical-align:middle;">${p.name}</td>
+            <td style="padding:5px 6px;border:1px solid #ddd;font-size:${fs}px;text-align:center;vertical-align:middle;">${p.unit}</td>
+            <td style="padding:5px 6px;border:1px solid #ddd;font-size:${fs}px;text-align:center;vertical-align:middle;">${p.area}</td>
+            <td style="padding:5px 6px;border:1px solid #ddd;font-size:${fs}px;vertical-align:middle;">${p.pic}</td>
+            <td style="padding:5px 6px;border:1px solid #ddd;font-size:${fs}px;text-align:center;font-weight:bold;vertical-align:middle;">${planPct}%</td>
+            <td style="padding:5px 8px;border:1px solid #ddd;vertical-align:middle;">${barHtml}</td>
+            <td style="padding:5px 6px;border:1px solid #ddd;font-size:${fs}px;text-align:center;font-weight:bold;color:${statusColor};vertical-align:middle;">${p.status}</td>
+        </tr>`;
+    });
+
+    let msHtml = '';
+    if (showMs && filteredData.length > 0) {
+        msHtml += `<div style="margin-top:24px;">
+            <h3 style="font-size:${fs+2}px;text-transform:uppercase;border-bottom:2px solid #111;padding-bottom:5px;margin-bottom:14px;">Granular Scope & Milestone Details</h3>`;
+        filteredData.forEach(p => {
+            const msItems = (p.milestones || []).map(m => {
+                const mk = m.progress === 100 ? '✔' : m.progress > 0 ? '~' : '○';
+                return `<span style="margin-right:12px;font-size:${fs-1}px;display:inline-block;">${mk} <b>${m.name}</b> (${m.progress}%) → ${m.date || '-'}</span>`;
+            }).join('');
+            msHtml += `<div style="border:1px solid #ccc;padding:10px 12px;margin-bottom:10px;page-break-inside:avoid;">
+                <div style="font-size:${fs}px;font-weight:bold;border-bottom:1px solid #ddd;padding-bottom:4px;margin-bottom:6px;">${p.id} : ${p.name}</div>
+                <div style="font-size:${fs-1}px;color:#555;margin-bottom:6px;">Unit: ${p.unit} | Area: ${p.area} | PIC: ${p.pic} | ${p.startDate} s/d ${p.dueDate}</div>
+                <div style="margin-bottom:4px;">${msItems}</div>
+                ${p.detail ? `<div style="margin-top:6px;padding:5px 8px;background:#f9f9f9;border-left:3px solid #333;font-size:${fs-1}px;color:#333;">${p.detail}</div>` : ''}
+            </div>`;
+        });
+        msHtml += `</div>`;
+    }
+
+    return `
+        <div style="font-family:'Segoe UI',Arial,sans-serif;color:#000;background:#fff;
+                    padding:${mt * 3.78}px ${mr * 3.78}px ${mb * 3.78}px ${ml * 3.78}px;
+                    box-sizing:border-box; width:900px;">
+            <div style="text-align:center;border-bottom:3px double #111;padding-bottom:12px;margin-bottom:16px;">
+                <div style="font-size:${fs+10}px;font-weight:bold;letter-spacing:1px;">PRASAD SEEDS</div>
+                <div style="font-size:${fs+3}px;text-transform:uppercase;letter-spacing:2px;margin-top:3px;">Project Monitoring Summary Report</div>
+                <div style="font-size:${fs-1}px;margin-top:6px;color:#444;">
+                    Generated: ${new Date().toLocaleString()} &nbsp;|&nbsp; UNIT: ${fUnit} | AREA: ${fArea} | STATUS: ${fStatus}
+                </div>
+            </div>
+            ${kpiHtml}
+            <h3 style="font-size:${fs+2}px;text-transform:uppercase;border-bottom:2px solid #111;padding-bottom:4px;margin-bottom:10px;">
+                Project Implementation Registry
+            </h3>
+            <table style="width:100%;border-collapse:collapse;table-layout:fixed;">
+                <colgroup>
+                    <col style="width:26%;"><col style="width:8%;"><col style="width:9%;">
+                    <col style="width:12%;"><col style="width:7%;"><col style="width:26%;"><col style="width:12%;">
+                </colgroup>
+                <thead>
+                    <tr style="background:#1a3a6b;">
+                        <th style="color:#fff;padding:7px 6px;text-align:left;font-size:${fs}px;border:1px solid #1a3a6b;">Project Name</th>
+                        <th style="color:#fff;padding:7px 6px;text-align:center;font-size:${fs}px;border:1px solid #1a3a6b;">Unit</th>
+                        <th style="color:#fff;padding:7px 6px;text-align:center;font-size:${fs}px;border:1px solid #1a3a6b;">Area</th>
+                        <th style="color:#fff;padding:7px 6px;text-align:center;font-size:${fs}px;border:1px solid #1a3a6b;">PIC</th>
+                        <th style="color:#fff;padding:7px 4px;text-align:center;font-size:${fs}px;border:1px solid #1a3a6b;">Plan%</th>
+                        <th style="color:#fff;padding:7px 6px;text-align:center;font-size:${fs}px;border:1px solid #1a3a6b;">Actual Progress</th>
+                        <th style="color:#fff;padding:7px 4px;text-align:center;font-size:${fs}px;border:1px solid #1a3a6b;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>${rowsHtml}</tbody>
+            </table>
+            ${msHtml}
+        </div>`;
+}
+
+function doExportPDFFromPreview() {
+    const paper   = document.getElementById('pp-paper').value;
+    const orient  = document.querySelector('input[name="pp-orient"]:checked').value;
+    const mt      = parseInt(document.getElementById('pp-mt').value) || 10;
+    const mb      = parseInt(document.getElementById('pp-mb').value) || 10;
+    const ml      = parseInt(document.getElementById('pp-ml').value) || 8;
+    const mr      = parseInt(document.getElementById('pp-mr').value) || 8;
+    const scale   = parseFloat(document.getElementById('pp-scale').value) || 2;
+
+    // Gunakan HTML yang sama persis dengan preview — tidak di-build ulang
+    if (!window._pdfReadyHtml) {
+        alert('Klik salah satu pengaturan dulu agar preview ter-generate.');
+        return;
+    }
+
+    const renderEl = document.createElement('div');
+    renderEl.style.cssText = `
+        position: absolute;
+        left: 0; top: 0;
+        width: 900px;
+        background: #fff;
+        z-index: -9999;
+        visibility: hidden;
+    `;
+    renderEl.innerHTML = window._pdfReadyHtml;
+    document.body.appendChild(renderEl);
+
+    const btn = document.querySelector('#modal-print-preview .modal-footer .btn-success');
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Generating...'; }
+
+    html2pdf().set({
+        margin:      [mt, ml, mb, mr],
+        filename:    `Prasad_Seeds_Report_${new Date().toISOString().slice(0,10)}.pdf`,
+        image:       { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale, useCORS: true, logging: false, backgroundColor: '#ffffff' },
+        jsPDF:       { unit: 'mm', format: paper, orientation: orient }
+    }).from(renderEl).save().then(() => {
+        document.body.removeChild(renderEl);
+        if (btn) { btn.disabled = false; btn.textContent = '⬇ Download PDF'; }
+        closeModal('modal-print-preview');
+    }).catch(err => {
+        console.error('PDF error:', err);
+        document.body.removeChild(renderEl);
+        if (btn) { btn.disabled = false; btn.textContent = '⬇ Download PDF'; }
+        alert('Gagal generate PDF: ' + err.message);
+    });
+}
+
+// ============================================================
+//  PRINT SUMMARY
+// ============================================================
+function printSummary() {
+    preparePDFTemplateData();
+    const printContent = document.getElementById('pdf-template').innerHTML;
+    const w = window.open('', '_blank');
+    w.document.write(`<html><head><title>Print Summary</title><style>body{font-family:'Segoe UI',Arial,sans-serif;padding:30px;background:#fff;color:#000;}table{width:100%;border-collapse:collapse;margin-bottom:20px;font-size:12px;}th,td{padding:8px;border:1px solid #222;text-align:left;}.pdf-project-card{border:1px solid #444;padding:15px;margin-bottom:15px;page-break-inside:avoid;}.pdf-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:5px;margin-bottom:10px;font-size:12px;}</style></head><body>${printContent}<script>window.onload=function(){window.print();window.close();}<\/script></body></html>`);
+    w.document.close();
+}
+
+// ============================================================
+//  GANTT CHART EXCEL EXPORT
+// ============================================================
+function openGanttModal() {
+    const listEl = document.getElementById('gantt-project-list');
+    listEl.innerHTML = '';
+    document.getElementById('gantt-check-all').checked = false;
+    document.getElementById('gantt-selected-count').textContent = '0 dipilih';
+
+    if (projects.length === 0) {
+        listEl.innerHTML = `<div style="padding:20px; text-align:center; color:var(--text-muted); font-size:13px;">Tidak ada project tersedia.</div>`;
+    } else {
+        projects.forEach(p => {
+            const item = document.createElement('div');
+            item.className = 'gantt-project-item';
+            item.innerHTML = `
+                <input type="checkbox" id="gantt-cb-${p.id}" class="gantt-cb" value="${p.id}" onchange="updateGanttSelectedCount()">
+                <label for="gantt-cb-${p.id}" style="flex-grow:1;">
+                    <div style="font-weight:600; color:#fff;">${p.name}</div>
+                    <div class="gantt-item-meta">${p.unit} · ${p.area} · ${p.startDate} s/d ${p.dueDate}</div>
+                </label>
+            `;
+            listEl.appendChild(item);
+        });
+    }
+    document.getElementById('modal-gantt').classList.add('active');
+}
+
+function toggleAllGanttProjects(masterCb) {
+    document.querySelectorAll('.gantt-cb').forEach(cb => { cb.checked = masterCb.checked; });
+    updateGanttSelectedCount();
+}
+
+function updateGanttSelectedCount() {
+    const total = document.querySelectorAll('.gantt-cb:checked').length;
+    document.getElementById('gantt-selected-count').textContent = total + ' dipilih';
+    const allCbs = document.querySelectorAll('.gantt-cb');
+    document.getElementById('gantt-check-all').checked = (total === allCbs.length && allCbs.length > 0);
+}
+
+function generateGanttExcel() {
+    const selected = [...document.querySelectorAll('.gantt-cb:checked')].map(cb => cb.value);
+    if (selected.length === 0) { alert('Pilih minimal 1 project untuk di-generate.'); return; }
+
+    // Pastikan XLSX tersedia
+    if (typeof XLSX === 'undefined') {
+        alert('Library Excel belum siap, coba refresh halaman.');
+        return;
+    }
+
+    const btn = document.querySelector('#modal-gantt .modal-footer .btn:last-child');
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Generating...'; }
+
+    try {
+        const selectedProjects = projects.filter(p => selected.includes(p.id));
+        const wb = XLSX.utils.book_new();
+
+        selectedProjects.forEach(p => {
+            const sheetData = buildGanttSheetData(p);
+            const ws = XLSX.utils.aoa_to_sheet(sheetData.rows);
+            applyGanttStyles(ws, sheetData, p);
+            // Nama sheet max 31 karakter, karakter terlarang dihapus
+            // Buat nama sheet unik: sanitasi + tambahkan ID project di depan
+        let safeSheetName = (p.id + '_' + p.name)
+            .replace(/[:\\\/\?\*\[\]']/g, '')
+            .trim()
+            .substring(0, 31) || `Sheet_${p.id}`;
+
+        // Fallback jika masih duplikat: tambahkan index
+        let finalSheetName = safeSheetName;
+        let dupCounter = 1;
+        while (wb.SheetNames.includes(finalSheetName)) {
+            const suffix = `_${dupCounter}`;
+            finalSheetName = safeSheetName.substring(0, 31 - suffix.length) + suffix;
+            dupCounter++;
+        }
+
+        XLSX.utils.book_append_sheet(wb, ws, finalSheetName);
+        });
+
+        const filename = `Gantt_Chart_PT_Prasad_Seeds_${new Date().toISOString().slice(0,10)}.xlsx`;
+        XLSX.writeFile(wb, filename);
+        closeModal('modal-gantt');
+
+    } catch (err) {
+        console.error('Excel error:', err);
+        alert('Gagal generate Excel: ' + err.message);
+    } finally {
+        if (btn) { btn.disabled = false; btn.textContent = '⬇ Generate & Download Excel'; }
+    }
+}
+
+function buildGanttSheetData(p) {
+    const startDate = new Date(p.startDate);
+    const endDate   = new Date(p.dueDate);
+
+    // Mulai dari Senin pertama sebelum/pada startDate
+    const displayStart = new Date(startDate);
+    const dow = displayStart.getDay();
+    const diffToMon = (dow === 0) ? -6 : 1 - dow;
+    displayStart.setDate(displayStart.getDate() + diffToMon);
+
+    // Kumpulkan semua hari kerja Senin-Sabtu + 1 minggu buffer setelah endDate
+    const allDays = [];
+    const cur = new Date(displayStart);
+    const bufferEnd = new Date(endDate);
+    bufferEnd.setDate(bufferEnd.getDate() + 7);
+    while (cur <= bufferEnd) {
+        if (cur.getDay() !== 0) allDays.push(new Date(cur));
+        cur.setDate(cur.getDate() + 1);
+    }
+
+    const DAY_NAMES = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+
+    // Kelompokkan per minggu untuk header baris week label
+    const weekGroups = [];
+    allDays.forEach((day, i) => {
+        if (i === 0 || day.getDay() === 1) {
+            weekGroups.push({ label: formatDateShort(day), start: i, end: i });
+        } else {
+            weekGroups[weekGroups.length - 1].end = i;
+        }
+    });
+
+    // Data rows: parent project + tiap milestone
+    const dataRows = [];
+    dataRows.push({
+        task: p.name,
+        remark: '',
+        progress: p.actualPct,
+        startDate: new Date(startDate),
+        endDate:   new Date(endDate),
+        isHeader: true
+    });
+    p.milestones.forEach(m => {
+        const mEnd = (m.date && m.date !== '') ? new Date(m.date) : new Date(p.dueDate);
+        dataRows.push({
+            task: m.name,
+            remark: '',
+            progress: parseInt(m.progress) || 0,
+            startDate: new Date(p.startDate),
+            endDate:   mEnd,
+            isHeader: false
+        });
+    });
+
+    const FIXED = 6;
+    const totalCols = FIXED + allDays.length;
+
+    function makeRow(vals) {
+        const row = [...vals];
+        while (row.length < totalCols) row.push('');
+        return row;
+    }
+
+    const rows = [];
+    rows.push(makeRow([`Project Plan : ${p.unit}`, '', '', '', '', '']));
+    rows.push(makeRow(['PT. Prasad Seeds Indonesia', '', '', '', '', '']));
+    rows.push(makeRow([]));
+
+    const r3 = makeRow(['', 'Project Start:', p.startDate, '', '', '']);
+    weekGroups.forEach(wg => { r3[FIXED + wg.start] = wg.label; });
+    rows.push(r3);
+
+    const r4 = makeRow(['', 'Display Week:', '8', '', '', '']);
+    allDays.forEach((d, i) => { r4[FIXED + i] = DAY_NAMES[d.getDay()]; });
+    rows.push(r4);
+
+    const r5 = makeRow([]);
+    allDays.forEach((d, i) => { r5[FIXED + i] = d.getDate(); });
+    rows.push(r5);
+
+    rows.push(makeRow(['TASK', 'REMARK', 'PROGRESS', 'START', 'END', '']));
+
+    dataRows.forEach(dr => {
+        const row = makeRow([
+            dr.task,
+            dr.remark,
+            dr.progress + '%',
+            formatDate(dr.startDate),
+            formatDate(dr.endDate),
+            ''
+        ]);
+        allDays.forEach((d, i) => {
+            row[FIXED + i] = (d >= dr.startDate && d <= dr.endDate) ? ' ' : '';
+        });
+        rows.push(row);
+    });
+
+    return { rows, allDays, weekGroups, dataRows, FIXED };
+}
+
+function applyGanttStyles(ws, sheetData, p) {
+    const { allDays, weekGroups, dataRows, FIXED } = sheetData;
+    const totalCols = FIXED + allDays.length;
+    const totalRows = 7 + dataRows.length;
+
+    ws['!cols'] = [
+        { wch: 32 },
+        { wch: 16 },
+        { wch: 9  },
+        { wch: 11 },
+        { wch: 11 },
+        { wch: 2  },
+        ...allDays.map(() => ({ wch: 3.2 }))
+    ];
+
+    ws['!rows'] = Array.from({ length: totalRows }, (_, i) => ({
+        hpt: i === 0 ? 24 : i === 6 ? 20 : 15
+    }));
+
+    ws['!merges'] = [
+        { s:{r:0,c:0}, e:{r:0,c:4} },
+        { s:{r:1,c:0}, e:{r:1,c:4} }
+    ];
+    weekGroups.forEach(wg => {
+        if (wg.end > wg.start)
+            ws['!merges'].push({ s:{r:3,c:FIXED+wg.start}, e:{r:3,c:FIXED+wg.end} });
+    });
+
+    ws['!ref'] = XLSX.utils.encode_range({s:{r:0,c:0},e:{r:totalRows-1,c:totalCols-1}});
+}
+
+function formatDate(d) {
+    if (!d) return '';
+    const dd = String(d.getDate()).padStart(2,'0');
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    const yy = String(d.getFullYear()).slice(2);
+    return `${dd}/${mm}/${yy}`;
+}
+
+function formatDateShort(d) {
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
 }
 </script>
 </body>
