@@ -1593,51 +1593,27 @@ function buildPDFContentHtml({ fs, showMs, showKpi, zebra, mt, mb, ml, mr }) {
 }
 
 function doExportPDFFromPreview() {
+    const content = document.getElementById('pp-preview-content').innerHTML;
     const paper   = document.getElementById('pp-paper').value;
     const orient  = document.querySelector('input[name="pp-orient"]:checked').value;
-    const mt      = parseInt(document.getElementById('pp-mt').value) || 10;
-    const mb      = parseInt(document.getElementById('pp-mb').value) || 10;
-    const ml      = parseInt(document.getElementById('pp-ml').value) || 8;
-    const mr      = parseInt(document.getElementById('pp-mr').value) || 8;
-    const scale   = parseFloat(document.getElementById('pp-scale').value) || 2;
-
-    // Gunakan HTML yang sama persis dengan preview — tidak di-build ulang
-    if (!window._pdfReadyHtml) {
-        alert('Klik salah satu pengaturan dulu agar preview ter-generate.');
-        return;
-    }
-
-    const renderEl = document.createElement('div');
-    renderEl.style.cssText = `
-        position: absolute;
-        left: 0; top: 0;
-        width: 900px;
-        background: #fff;
-        z-index: -9999;
-        visibility: hidden;
-    `;
-    renderEl.innerHTML = window._pdfReadyHtml;
-    document.body.appendChild(renderEl);
-
-    const btn = document.querySelector('#modal-print-preview .modal-footer .btn-success');
-    if (btn) { btn.disabled = true; btn.textContent = '⏳ Generating...'; }
-
-    html2pdf().set({
-        margin:      [mt, ml, mb, mr],
-        filename:    `Prasad_Seeds_Report_${new Date().toISOString().slice(0,10)}.pdf`,
-        image:       { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale, useCORS: true, logging: false, backgroundColor: '#ffffff' },
-        jsPDF:       { unit: 'mm', format: paper, orientation: orient }
-    }).from(renderEl).save().then(() => {
-        document.body.removeChild(renderEl);
-        if (btn) { btn.disabled = false; btn.textContent = '⬇ Download PDF'; }
-        closeModal('modal-print-preview');
-    }).catch(err => {
-        console.error('PDF error:', err);
-        document.body.removeChild(renderEl);
-        if (btn) { btn.disabled = false; btn.textContent = '⬇ Download PDF'; }
-        alert('Gagal generate PDF: ' + err.message);
-    });
+    const mt = document.getElementById('pp-mt').value;
+    const mb = document.getElementById('pp-mb').value;
+    const ml = document.getElementById('pp-ml').value;
+    const mr = document.getElementById('pp-mr').value;
+    const w = window.open('', '_blank');
+    w.document.write(`<html><head><title></title>
+    <style>
+        @page { size: ${paper} ${orient}; margin: ${mt}mm ${mr}mm ${mb}mm ${ml}mm; }
+        body { margin:0; padding:0; font-family:'Segoe UI',Arial,sans-serif; background:#fff; color:#000; }
+        table { width:100%; border-collapse:collapse; table-layout:fixed; }
+        th,td { border:1px solid #ddd; }
+        @media print {
+            body { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+            @page { margin: ${mt}mm ${mr}mm ${mb}mm ${ml}mm; }
+            html { -webkit-print-color-adjust: exact; }
+        }
+    </style></head><body>${content}<script>window.onload=function(){window.print();}<\/script></body></html>`);
+    w.document.close();
 }
 
 // ============================================================
